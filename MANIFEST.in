@@ -1,4 +1,5 @@
 recursive-include main_directory *
 recursive-include docs *
 include *
+include incendiary/thrift/zipkinCore.thrift
 global-exclude *.pyc

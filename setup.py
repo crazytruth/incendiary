@@ -1,14 +1,18 @@
 from setuptools import setup, find_packages
 
-import incendiary
+
 
 def readme():
     with open('README.rst') as f:
         return f.read()
 
+
+from incendiary import __version__
+
+
 setup(
     name='incendiary',
-    version=incendiary.__version__,
+    version=__version__,
     description='opentracing implementation in python',
     long_description=readme(),
     classifiers=[
@@ -23,7 +27,8 @@ setup(
     license='BSD',
     install_requires=[
         'basictracer',
-        'thriftpy'
+        'thriftpy',
+        'requests'
     ],
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     include_package_data=True,
