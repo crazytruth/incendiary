@@ -5,6 +5,7 @@ See the API definition for comments.
 """
 
 import atexit
+import platform
 import ssl
 import sys
 import threading
@@ -12,6 +13,7 @@ import time
 import traceback
 import warnings
 import requests
+import logging
 
 from basictracer.recorder import SpanRecorder
 
@@ -29,6 +31,21 @@ STANDARD_ANNOTATIONS = {
     'server': {'ss': [], 'sr': []},
 }
 STANDARD_ANNOTATIONS_KEYS = frozenset(STANDARD_ANNOTATIONS.keys())
+
+# logger = logging.getLogger('network')
+# logger = logging.getLogger('incendiary')
+# logger.setLevel(logging.DEBUG)
+
+class ContextFilter(logging.Filter):
+    def filter(self, record):
+
+        record.host = platform.node()
+        record.status = 0
+        record.request = None
+        record.byte = 0
+        return True
+
+
 
 
 class ZipkinRecorder(SpanRecorder):
@@ -95,6 +112,18 @@ class ZipkinRecorder(SpanRecorder):
                 ' flush to zipkin_ot unless explicitly requested.'.format(
                     self._periodic_flush_seconds))
 
+        self._logger = None
+
+    @property
+    def logger(self):
+        if self._logger is None:
+            self._logger = logging.getLogger('network')
+            self._logger.addFilter(ContextFilter())
+        return self._logger
+
+
+
+
     def _maybe_init_flush_thread(self):
         """Start a periodic flush mechanism for this recorder if:
         1. periodic_flush_seconds > 0, and
@@ -119,15 +148,18 @@ class ZipkinRecorder(SpanRecorder):
     #     if self.verbosity >= 2:
     #         print("[Zipkin_OpenTracing Tracer]:", (fmt % args))
 
+
     def _fine(self, fmt, args):
         if self.verbosity >= 1:
-            fmt_args = fmt.format(args)
-            print("[Zipkin OpenTracing Tracer]: ", fmt_args)
+            fmt_args = fmt.format(*args)
+            self.logger.warning(fmt_args)
+            # print("[Zipkin OpenTracing Tracer]: ", fmt_args)
 
     def _finest(self, fmt, args):
         if self.verbosity >= 2:
-            fmt_args = fmt.format(args)
-            print("[Zipkin OpenTracing Tracer]: ", fmt_args)
+            fmt_args = fmt.format(*args)
+            self.logger.warning(fmt_args)
+            # print("[Zipkin OpenTracing Tracer]: ", fmt_args)
 
 
     def record_span(self, span):
@@ -307,7 +339,7 @@ class ZipkinRecorder(SpanRecorder):
 
             self._fine(
                 "Caught exception during report: {0}, stack trace: {1}",
-                (e, traceback.format_exc(e)))
+                (e, traceback.format_exc()))
             self._restore_spans(span_records)
             return False
 
