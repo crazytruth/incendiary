@@ -3,3 +3,4 @@ recursive-include docs *
 include *
 include incendiary/thrift/zipkinCore.thrift
 global-exclude *.pyc
+exclude .python-version
