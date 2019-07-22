@@ -1,16 +1,16 @@
 =============================
-iniesta
+incendiary
 =============================
 
 .. image:: https://badge.fury.io/py/incendiary.png
     :target: http://badge.fury.io/py/incendiary
 
-.. image:: https://travis-ci.org/crazytruth/iniesta.png?branch=master
+.. image:: https://travis-ci.org/crazytruth/incendiary.png?branch=master
     :target: https://travis-ci.org/crazytruth/incendiary
 
 Messaging integration for insanic
 
-.. image:: docs/_static/iniesta.png
+.. image:: docs/_static/incendiary.png
 
 Why?
 ----
@@ -73,7 +73,7 @@ Testing
     $ pip install .[development]
     $ pytest
     # with coverage
-    $ pytest --cov=iniesta --cov-report term-missing:skip-covered
+    $ pytest --cov=incendiary --cov-report term-missing:skip-covered
 
 To view documentation
 =====================
