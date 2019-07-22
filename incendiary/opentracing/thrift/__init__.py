@@ -9,10 +9,8 @@ from thriftpy.transport import TMemoryBuffer
 
 from incendiary.util import unsigned_hex_to_signed_int
 
-
 thrift_filepath = os.path.join(os.path.dirname(__file__), 'zipkinCore.thrift')
 zipkin_core = thriftpy.load(thrift_filepath, module_name="zipkinCore_thrift")
-
 
 dummy_endpoint = zipkin_core.Endpoint()
 
@@ -116,12 +114,12 @@ def binary_annotation_list_builder(binary_annotations, host):
 
 
 def create_span(
-    span_id,
-    parent_span_id,
-    trace_id,
-    span_name,
-    annotations,
-    binary_annotations,
+        span_id,
+        parent_span_id,
+        trace_id,
+        span_name,
+        annotations,
+        binary_annotations,
 ):
     """Takes a bunch of span attributes and returns a thriftpy representation
     of the span.
@@ -137,8 +135,10 @@ def create_span(
         span_dict["parent_id"] = unsigned_hex_to_signed_int(parent_span_id)
     return zipkin_core.Span(**span_dict)
 
+
 def to_thrift_spans(spans):
     return zipkin_core.Spans(spans)
+
 
 def thrift_obj_in_bytes(thrift_obj):  # pragma: no cover
     """
@@ -149,6 +149,7 @@ def thrift_obj_in_bytes(thrift_obj):  # pragma: no cover
     trans = TMemoryBuffer()
     thrift_obj.write(TBinaryProtocol(trans))
     return bytes(trans.getvalue())
+
 
 def spans_from_bytes(buf):
     trans = TMemoryBuffer(buf)

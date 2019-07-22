@@ -1,6 +1,9 @@
-from __future__ import absolute_import
+import pkg_resources
 
-__version__ = '0.0.6.dev0'
+__version__ = pkg_resources.get_distribution('incendiary').version
+__author__ = 'Kwang Jin Kim'
+__email__ = 'david@mymusictaste.com'
 
-# from .tracer import Tracer  # noqa
+from incendiary.xray.app import Incendiary
 
+__all__ = ['Incendiary', 'OpenTracing']

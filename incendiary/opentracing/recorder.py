@@ -32,20 +32,18 @@ STANDARD_ANNOTATIONS = {
 }
 STANDARD_ANNOTATIONS_KEYS = frozenset(STANDARD_ANNOTATIONS.keys())
 
+
 # logger = logging.getLogger('network')
 # logger = logging.getLogger('incendiary')
 # logger.setLevel(logging.DEBUG)
 
 class ContextFilter(logging.Filter):
     def filter(self, record):
-
         record.host = platform.node()
         record.status = 0
         record.request = None
         record.byte = 0
         return True
-
-
 
 
 class ZipkinRecorder(SpanRecorder):
@@ -92,8 +90,8 @@ class ZipkinRecorder(SpanRecorder):
                 self.annotation_filter.update(STANDARD_ANNOTATIONS[include_name])
 
         self._collector_url = util._collector_url_from_hostport(False,
-            collector_host,
-            collector_port)
+                                                                collector_host,
+                                                                collector_port)
         self._mutex = threading.Lock()
         self._span_records = []
         self._max_span_records = max_span_records
@@ -121,9 +119,6 @@ class ZipkinRecorder(SpanRecorder):
             self._logger.addFilter(ContextFilter())
         return self._logger
 
-
-
-
     def _maybe_init_flush_thread(self):
         """Start a periodic flush mechanism for this recorder if:
         1. periodic_flush_seconds > 0, and
@@ -148,7 +143,6 @@ class ZipkinRecorder(SpanRecorder):
     #     if self.verbosity >= 2:
     #         print("[Zipkin_OpenTracing Tracer]:", (fmt % args))
 
-
     def _fine(self, fmt, args):
         if self.verbosity >= 1:
             fmt_args = fmt.format(*args)
@@ -160,7 +154,6 @@ class ZipkinRecorder(SpanRecorder):
             fmt_args = fmt.format(*args)
             self.logger.warning(fmt_args)
             # print("[Zipkin OpenTracing Tracer]: ", fmt_args)
-
 
     def record_span(self, span):
         """Per BasicSpan.record_span, safely add a span to the buffer.
@@ -325,8 +318,6 @@ class ZipkinRecorder(SpanRecorder):
 
             self._finest("Received response from collector: {0}",
                          (r.status_code,))
-
-
 
             # Return whether we sent any span data
             return len(span_records) > 0
@@ -709,4 +700,3 @@ See the API definition for comments.
 #             self._span_records = combined[-self._max_span_records:]
 #
 #
-

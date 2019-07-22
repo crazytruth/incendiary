@@ -1,6 +1,14 @@
-recursive-include main_directory *
-recursive-include docs *
-include *
+global-exclude *.py[co]
+global-exclude __pycache__
+recursive-include iniesta *.py
+include AUTHORS.rst
+include CONTRIBUTING.rst
+include HISTORY.rst
+include LICENSE
+include README.rst
+include tox.ini
+exclude *.png
+graft test
+graft docs
 include incendiary/thrift/zipkinCore.thrift
-global-exclude *.pyc
 exclude .python-version

@@ -34,4 +34,3 @@ JOIN_ID_TAG_PREFIX = "join:"
 
 HTTP_URL = 'http.url'
 HTTP_PATH = 'http.path'
-

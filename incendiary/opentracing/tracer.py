@@ -36,6 +36,7 @@ def Tracer(**kwargs):
     """
     return _OpenZipkinTracer(Recorder(**kwargs))
 
+
 class _OpenZipkinTracer(BasicTracer):
     def __init__(self, recorder):
         """Initialize the OpenZipkin Tracer, deferring to BasicTracer."""

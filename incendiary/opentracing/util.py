@@ -6,8 +6,8 @@ import math
 import struct
 from . import constants
 
+guid_rng = random.Random()  # Uses urandom seed
 
-guid_rng = random.Random()   # Uses urandom seed
 
 def _collector_url_from_hostport(secure, host, port):
     """
@@ -20,16 +20,19 @@ def _collector_url_from_hostport(secure, host, port):
         protocol = 'http://'
     return ''.join([protocol, host, ':', str(port), '/api/v1/spans'])
 
+
 def _generate_guid():
     """
     Construct a guid - a random 64 bit integer
     """
     return guid_rng.getrandbits(64) - 1
 
+
 def _id_to_hex(id):
     if id is None:
         return None
     return '{0:x}'.format(id)
+
 
 def _now_micros():
     """
@@ -37,11 +40,13 @@ def _now_micros():
     """
     return _time_to_micros(time.time())
 
+
 def _time_to_micros(t):
     """
     Convert a time.time()-style timestamp to microseconds.
     """
     return math.floor(round(t * constants.SECONDS_TO_MICRO))
+
 
 def _merge_dicts(*dict_args):
     """Destructively merges dictionaries, returns None instead of an empty dictionary.
@@ -66,9 +71,11 @@ def unsigned_hex_to_signed_int(hex_string):
     """
     return struct.unpack('q', struct.pack('Q', int(hex_string, 16)))[0]
 
+
 # Coerce to utf-8 under Python 3.
 def _coerce_str(val):
     return _coerce_to_unicode(val)
+
 
 def _coerce_to_bytes(val):
     if isinstance(val, bytes):
@@ -81,6 +88,7 @@ def _coerce_to_bytes(val):
         except Exception:
             # Never let these errors bubble up
             return '(encoding error)'
+
 
 def _coerce_to_unicode(val):
     if isinstance(val, str):
