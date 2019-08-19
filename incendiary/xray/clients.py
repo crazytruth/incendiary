@@ -24,8 +24,14 @@ LOCAL_EXCEPTIONS = (
 )
 
 
+def _get_recorder(ctx):
+    if hasattr(ctx, "xray_recorder"):
+        return ctx.xray_recorder
+    return xray_recorder
+
 async def begin_subsegment(session, trace_config_ctx, params):
     name = trace_config_ctx.name if trace_config_ctx.name else strip_url(str(params.url))
+    xray_recorder = _get_recorder(trace_config_ctx)
     try:
         subsegment = xray_recorder.begin_subsegment(name, REMOTE_NAMESPACE)
     except exceptions.SegmentNotFoundException:
@@ -42,8 +48,19 @@ async def begin_subsegment(session, trace_config_ctx, params):
 
 
 async def end_subsegment(session, trace_config_ctx, params):
+    """
+    As long as the request returns a response, this gets run
+
+    :param session:
+    :param trace_config_ctx:
+    :param params:
+    :return:
+    """
+
+
     if trace_config_ctx.give_up:
         return
+    xray_recorder = _get_recorder(trace_config_ctx)
 
     subsegment = xray_recorder.current_subsegment()
     if subsegment.sampled:
@@ -59,9 +76,18 @@ async def end_subsegment(session, trace_config_ctx, params):
 
 
 async def end_subsegment_with_exception(session, trace_config_ctx, params):
+    """
+    exception when establishing connection
+
+    :param session:
+    :param trace_config_ctx:
+    :param params:
+    :return:
+    """
+
     if trace_config_ctx.give_up:
         return
-
+    xray_recorder = _get_recorder(trace_config_ctx)
     subsegment = xray_recorder.current_subsegment()
 
     if subsegment.sampled:
@@ -76,7 +102,7 @@ async def end_subsegment_with_exception(session, trace_config_ctx, params):
     xray_recorder.end_subsegment()
 
 
-def aws_xray_trace_config(name=None):
+def aws_xray_trace_config(*, xray_recorder=None, name=None):
     """
     :param name: name used to identify the subsegment, with None internally the URL will
                  be used as identifier.
@@ -85,6 +111,7 @@ def aws_xray_trace_config(name=None):
 
     def _trace_config_ctx_factory(trace_request_ctx):
         return SimpleNamespace(
+            xray_recorder=xray_recorder,
             name=name,
             trace_request_ctx=trace_request_ctx
         )

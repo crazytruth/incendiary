@@ -27,6 +27,18 @@ test_requires = [
     'aioresponses'
 ]
 
+xray_requirements = [
+    'aws-xray-sdk==2.4.2'
+]
+
+opentracing_requirements = [
+    'basictracer', 'thriftpy',
+]
+
+docs_requirements = ['sphinx', 'sphinx_rtd_theme']
+
+cli_requirements = ["Click>=6.0"]
+
 setup(
     name='incendiary',
     version=version,
@@ -38,15 +50,20 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     include_package_data=True,
     install_requires=[
-        'insanic>=0.8.0',
+        # 'insanic>=0.8.0',
     ],
     tests_require=test_requires,
     extras_require={
-        "xray": ['aws-xray-sdk==2.4.2'],
-        "opentracing": ['basictracer', 'thriftpy', ],
-        "development": test_requires + ['sphinx', 'sphinx_rtd_theme'],
+        "xray": xray_requirements,
+        "opentracing": opentracing_requirements,
+        "docs": docs_requirements,
+        "cli": cli_requirements,
+        "development": test_requires +
+                       xray_requirements +
+                       opentracing_requirements +
+                       docs_requirements +
+                       cli_requirements,
         "release": ["zest.releaser[recommended]", "flake8"],
-        "cli": ["Click>=6.0"]
     },
     classifiers=[
     'Development Status :: 3 - Alpha',

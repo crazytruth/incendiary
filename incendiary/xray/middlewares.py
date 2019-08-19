@@ -7,19 +7,20 @@ from insanic.utils.obfuscating import get_safe_dict
 
 from incendiary.xray.utils import abbreviate_for_xray
 
-from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core.models import http
 from aws_xray_sdk.ext.util import calculate_segment_name, construct_xray_header
 
 
 async def before_request(request):
+    xray_recorder = request.app.xray_recorder
+
     headers = request.headers
     xray_header = construct_xray_header(headers)
 
     name = calculate_segment_name(request.host, xray_recorder)
 
     # custom decision to skip if TRACING_ENABLED is false
-    sampling_decision = request.app.sampler.calculate_sampling_decision(
+    sampling_decision = xray_recorder.sampler.calculate_sampling_decision(
         trace_header=xray_header,
         recorder=xray_recorder,
         service_name=request.host,
@@ -61,11 +62,10 @@ async def before_request(request):
 
                 segment.put_metadata(f"{attr}", payload, "request")
 
-    request.segment = segment
-
 
 async def after_request(request, response):
-    segment = request.segment or xray_recorder.current_segment()
+    xray_recorder = request.app.xray_recorder
+    segment = xray_recorder.current_segment()
 
     if segment.sampled:
         # setting user was moved from _before_request,

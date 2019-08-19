@@ -1,20 +1,25 @@
 import socket
 
+from insanic.exceptions import ImproperlyConfigured
 from insanic.monitor import MONITOR_ENDPOINTS
 from insanic.services import Service
 
 from incendiary.loggers import logger, error_logger
 from incendiary.xray import config
 from incendiary.xray.clients import aws_xray_trace_config
-from incendiary.xray.context import AsyncContext
+from incendiary.xray.contexts import IncendiaryAsyncContext
 from incendiary.xray.middlewares import before_request, after_request
-from incendiary.xray.sampling import Sampler
+from incendiary.xray.mixins import CaptureMixin
+from incendiary.xray.sampling import IncendiaryDefaultSampler
+from incendiary.xray.utils import tracing_name
 
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch, xray_recorder, AsyncAWSXRayRecorder
+from aws_xray_sdk.sdk_config import SDKConfig
 
 
-class Incendiary(object):
+class Incendiary(CaptureMixin):
     config_imported = False
+    extra_recorder_configurations = {}
 
     @classmethod
     def load_config(self, settings_object):
@@ -29,20 +34,28 @@ class Incendiary(object):
     def _handle_error(cls, app, messages):
         error_message = "[XRAY] Tracing was not initialized because: " + ', '.join(messages)
 
-        if not app.config.TRACING_SOFT_FAIL and app.config.TRACING_REQUIRED:
+        if not app.config.TRACING_SOFT_FAIL or app.config.TRACING_REQUIRED:
             error_logger.critical(error_message)
-            raise EnvironmentError(error_message)
+            raise ImproperlyConfigured(error_message)
         else:
             error_logger.warning(error_message)
 
     @classmethod
     def _check_prerequisites(cls, app):
+        """
+        checks to see if xray is accessiable
+
+
+        :param app: Insanic application
+        :return: list of error messages while checking
+        :rtype: list
+        """
         messages = []
         tracing_host = app.config.TRACING_HOST
         tracing_port = app.config.TRACING_PORT
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        try:
+        try:  # pragma: no cover
             socket.gethostbyname(tracing_host)
             sock.settimeout(1)
             if sock.connect_ex((tracing_host, int(tracing_port))) != 0:
@@ -50,8 +63,8 @@ class Incendiary(object):
                     f"Could not connect to port on [{tracing_host}:{tracing_port}].")
         except socket.gaierror:
             messages.append(f"Could not resolve host [{tracing_host}].")
-        except Exception:
-            messages.append(f"Could not connect to [{tracing_host}:{tracing_port}].")
+        except socket.error as e:  # pragma: no cover
+            messages.append(f"Could not connect to [{tracing_host}:{tracing_port}]: {str(e)}")
         finally:
             sock.close()
         return messages
@@ -61,31 +74,37 @@ class Incendiary(object):
         # checks to see if tracing can be enabled
         cls.load_config(app.config)
         messages = cls._check_prerequisites(app)
-        app.sampler = Sampler(app)
 
         if len(messages) == 0:
+            SDKConfig.set_sdk_enabled(True)
+            app.xray_recorder = AsyncAWSXRayRecorder()
+
             cls.setup_middlewares(app)
-            cls.setup_client()
+            cls.setup_client(app)
             cls.setup_listeners(app)
-            cls.patch_service()
 
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
         else:
-            cls._handle_error(app, messages)
-            app.config.TRACING_ENABLED = False
+            try:
+                cls._handle_error(app, messages)
+            except ImproperlyConfigured:
+                raise
+            finally:
+                app.config.TRACING_ENABLED = False
+                SDKConfig.set_sdk_enabled(False)
 
     @classmethod
     def setup_listeners(cls, app):
         async def before_server_start_start_tracing(app, loop=None, **kwargs):
-            xray_recorder.configure(**cls.xray_config(app))
+            app.xray_recorder.configure(**cls.xray_config(app))
 
         # need to configure xray as the first thing that happens so insert into 0
         if before_server_start_start_tracing not in app.listeners['before_server_start']:
             app.listeners['before_server_start'].insert(0, before_server_start_start_tracing)
 
     @classmethod
-    def setup_client(cls):
-        Service.extra_session_configs = {'trace_configs': [aws_xray_trace_config()]}
+    def setup_client(cls, app):
+        Service.extra_session_configs = {'trace_configs': [aws_xray_trace_config(xray_recorder=app.xray_recorder)]}
 
     @classmethod
     def setup_middlewares(cls, app):
@@ -107,26 +126,22 @@ class Incendiary(object):
             else:
                 await after_request(request, response)
 
-            if hasattr(request, "segment"):
-                response.segment = request.segment
             return response
-
-    @classmethod
-    def patch_service(cls):
-        from insanic.services import Service
-        Service.extra_session_configs = {"trace_configs": [aws_xray_trace_config()]}
 
     @classmethod
     def xray_config(cls, app):
         config = dict(
-            service=app.sampler.tracing_service_name,
-            context=AsyncContext(),
+            service=tracing_name(app.config.SERVICE_NAME),
+            context=IncendiaryAsyncContext(),
             sampling=True,
-            sampling_rules=app.sampler.sampling_rules,
+            sampler=IncendiaryDefaultSampler(app),
+            # sampling_rules=app.sampler.sampling_rules,
             daemon_address=f"{app.config.TRACING_HOST}:{app.config.TRACING_PORT}",
             context_missing=app.config.TRACING_CONTEXT_MISSING_STRATEGY,
             streaming_threshold=10,
-            plugins=('ECSPlugin',)
+            plugins=('ECSPlugin',),
         )
+
+        config.update(cls.extra_recorder_configurations)
 
         return config

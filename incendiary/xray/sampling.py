@@ -1,9 +1,12 @@
 import copy
 
-from insanic.functional import cached_property
+from aws_xray_sdk.core.sampling.sampler import DefaultSampler
+from aws_xray_sdk.core.sampling.local.sampler import LocalSampler
+
+from incendiary.loggers import logger
 
 
-class Sampler:
+class IncendiaryDefaultSampler(DefaultSampler):
     _sample_rule = {
         "description": str,
         "service_name": str,
@@ -15,45 +18,24 @@ class Sampler:
 
     def __init__(self, app):
         self.app = app
+        super().__init__()
+        self._local_sampler = LocalSampler(self.local_rules)
 
     # @cached_property
-    # def tracing_service_name(self):
-    #     return f"{self.app.config.MMT_ENV.upper()}:{self.app.config.SERVICE_NAME}"
-
-    @cached_property
-    def tracing_service_name(self):
-        return f"{self.app.config.SERVICE_NAME}:{self.app.config.MMT_ENV.lower()}"
-
-    # def _validate_sampling_rule(self, rule):
-    #     if not isinstance(rule, dict):
-    #         raise RuntimeError("Invalid sampling rule format. Not valid type.")
+    # @property
+    # def sampling_rules(self):
     #
-    #     if sorted(rule.keys()) != sorted(self._sample_rule.keys()):
-    #         raise RuntimeError("Invalid sampling rule format. Required fields are {0}.".format(
-    #             ", ".join(self._sample_rule.keys())))
     #
-    #     for k, v in self._sample_rule.items():
-    #         if not isinstance(rule[k], v):
-    #             raise RuntimeError("Invalid sampling rule format. Not valid type for {0}.".format(k))
+    #     return rules
     #
-    # def validate_sampling_rules(self, rules):
-    #     if isinstance(rules, list):
-    #         for r in rules:
-    #             self._validate_sampling_rule(r)
-    #     elif isinstance(rules, dict):
-    #         self._validate_sampling_rule(rules)
-    #     else:
-    #         raise RuntimeError("Something wrong with sampling rules. {0}".format(rules))
-
-    # @cached_property
     @property
-    def sampling_rules(self):
+    def local_rules(self):
         rules = copy.deepcopy(self.app.config.SAMPLING_RULES)
         if not self.app.config.TRACING_ENABLED:
             rules.update({"rules": []})
             rules.update({"default": {"fixed_target": 0, "rate": 0}})
-
         return rules
+
 
     def calculate_sampling_decision(self, trace_header, recorder,
                                     service_name, method, path):
@@ -62,22 +44,27 @@ class Sampler:
         The sampling decision coming from ``trace_header`` always has
         the highest precedence. If the ``trace_header`` doesn't contain
         sampling decision then it checks if sampling is enabled or not
-        in the recorder. If not enbaled it returns 1. Otherwise it uses
+        in the recorder. If not enabled it returns 1. Otherwise it uses
         sampling rule to decide.
         """
         if trace_header.sampled is not None and trace_header.sampled != '?':
+            logger.debug("Sample decision: from trace headers.")
             return trace_header.sampled
         elif not self.app.config.TRACING_ENABLED:
+            logger.debug("Sample decision: from insanic configs")
             return 0
         elif not recorder.sampling:
+            logger.debug("Sample decision: from recorder sampling")
             return 1
-        elif recorder.sampler.should_trace(
+        elif self.should_trace(
                 sampling_req=
                 {
                     "method": method,
                     "path": path
                 }
         ):
+            logger.debug("Sample decision: from sampler rules")
             return 1
         else:
+            logger.debug("Sample decision: not sampled ")
             return 0
