@@ -84,6 +84,7 @@ class Incendiary(CaptureMixin):
             cls.setup_listeners(app)
 
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
+            app.plugin_initialized('incendiary', cls)
         else:
             try:
                 cls._handle_error(app, messages)
