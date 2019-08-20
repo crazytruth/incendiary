@@ -8,7 +8,7 @@ incendiary
 .. image:: https://travis-ci.org/crazytruth/incendiary.png?branch=master
     :target: https://travis-ci.org/crazytruth/incendiary
 
-Messaging integration for insanic
+Tracing plugin for insanic
 
 .. image:: docs/_static/incendiary.png
 
@@ -46,14 +46,14 @@ For AWS X-Ray usage
 
 .. code-block:: bash
 
-    pip install .[xray]
+    pip install incendiary[xray]
 
 For OpenTracing usage
 ---------------------
 
 .. code-block:: bash
 
-    pip install .[opentracing]
+    pip install incendiary[opentracing]
 
 NOTE: for your requirements.txt must place
 
@@ -64,6 +64,47 @@ NOTE: for your requirements.txt must place
     # or
 
     incendiary[opentracing] == 0.1.0
+
+
+To initialize
+=============
+
+.. code-block:: py
+
+    # app.py
+
+    ...
+
+    from incendiary import Incendiary
+
+    app = Insanic(__name__)
+
+    Incendiary.init_app(app)
+
+To capture
+==========
+
+.. code-block:: py
+
+    # in_some_module_you_want_to_capture.py
+
+    from incendiary import Incendiary
+
+    # if async function
+
+    @Incendiary.capture_async(name="Name of subsegment")
+    async def i_want_to_capture_async():
+        pass
+
+    # if sync function
+
+    @Incendiary.capture(name="Name of subsegment")
+    def i_want_to_capture():
+        pass
+
+
+- `name` can be `None`. If `None` will default to function name.
+
 
 Commands
 ========
