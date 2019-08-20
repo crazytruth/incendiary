@@ -7,8 +7,8 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
-include tox.ini
+exclude tox.ini
 exclude *.png
-recursive-exclude test *.py
 exclude docs
 exclude .python-version
+recursive-exclude tests *.py
