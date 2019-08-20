@@ -9,6 +9,7 @@ include LICENSE
 include README.rst
 exclude tox.ini
 exclude *.png
+exclude *.jpg
 exclude docs
 exclude .python-version
 graft tests
