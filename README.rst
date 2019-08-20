@@ -10,7 +10,7 @@ incendiary
 
 Tracing plugin for insanic
 
-.. image:: incendiary.png
+.. image:: incendiary.jpg
 
 Why?
 ----
