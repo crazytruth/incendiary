@@ -15,7 +15,11 @@ Tracing plugin for insanic
 Why?
 ----
 
-Incendiary is a tracing plugin for Insanic.
+Tracing is needed in any micro service architecture, and this plugin aims to
+patch insanic's interservice's object so tracing information can be sent to xray.
+
+
+The reason it is called incendiary is because of tracer ammunition.
 
 
 Features
