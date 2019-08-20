@@ -45,13 +45,25 @@ For AWS X-Ray usage
 -------------------
 
 .. code-block:: bash
+
     pip install .[xray]
 
 For OpenTracing usage
 ---------------------
 
 .. code-block:: bash
+
     pip install .[opentracing]
+
+NOTE: for your requirements.txt must place
+
+.. code-block:: txt
+
+    incendiary[xray] == 0.1.0
+
+    # or
+
+    incendiary[opentracing] == 0.1.0
 
 Commands
 ========
