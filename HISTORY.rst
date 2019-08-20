@@ -3,7 +3,7 @@
 History
 -------
 
-0.0.6 (unreleased)
+0.1.0 (2019-08-20)
 ++++++++++++++++++
 
 - MAJOR: Initial possible working commit of incendiary
