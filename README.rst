@@ -10,7 +10,7 @@ incendiary
 
 Tracing plugin for insanic
 
-.. image:: docs/_static/incendiary.png
+.. image:: https://en.wikipedia.org/wiki/Tracer_ammunition#/media/File:Tracer_fire_at_MCB_Camp_Pendleton_DM-ST-89-00210.jpg
 
 Why?
 ----
