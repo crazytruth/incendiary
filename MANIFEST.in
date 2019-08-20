@@ -1,6 +1,6 @@
 global-exclude *.py[co]
 global-exclude __pycache__
-recursive-include iniesta *.py
+recursive-include incendiary *.py
 include AUTHORS.rst
 include CONTRIBUTING.rst
 include HISTORY.rst
@@ -8,7 +8,7 @@ include LICENSE
 include README.rst
 include tox.ini
 exclude *.png
-graft test
+exclude test
 graft docs
-include incendiary/thrift/zipkinCore.thrift
+recursive-include incendiary *.thrift
 exclude .python-version
