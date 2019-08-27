@@ -6,7 +6,8 @@ History
 0.1.1 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- UPDATE: updates behavior for capture to just log if incendiary is not initialized
+- CHORE: image and documentations updates
 
 
 0.1.0 (2019-08-20)
