@@ -50,7 +50,7 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     include_package_data=True,
     install_requires=[
-        # 'insanic>=0.8.0',
+        'insanic>=0.8.1',
     ],
     tests_require=test_requires,
     extras_require={
