@@ -8,6 +8,7 @@ History
 
 - UPDATE: updates behavior for capture to just log if incendiary is not initialized
 - CHORE: image and documentations updates
+- FIX: updates insanic requirements to 0.8.1
 
 
 0.1.0 (2019-08-20)
