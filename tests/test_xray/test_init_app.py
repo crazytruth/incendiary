@@ -20,8 +20,7 @@ class TestIncendiaryXRayInitialize():
 
         monkeypatch.setattr(Incendiary, '_check_prerequisites', mock_check_prerequisites)
 
-        with pytest.raises(ImproperlyConfigured):
-            Incendiary.init_app(insanic_application)
+        Incendiary.init_app(insanic_application)
 
         assert insanic_application.config.TRACING_ENABLED == False
 
@@ -34,10 +33,10 @@ class TestIncendiaryXRayInitialize():
     @pytest.mark.parametrize(
         'soft_fail, required, expected',
         (
-                (False, False, "EXCEPTION"),
+                (False, False, "LOG"),
                 (True, False, "LOG"),
-                (False, True, "EXCEPTION"),
-                (True, True, "EXCEPTION")
+                (False, True, "LOG"),
+                (True, True, "LOG")
         )
     )
     def test_handle_error(self, insanic_application, monkeypatch, soft_fail, required, expected, caplog):

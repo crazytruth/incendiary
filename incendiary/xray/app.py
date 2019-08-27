@@ -14,12 +14,13 @@ from incendiary.xray.sampling import IncendiaryDefaultSampler
 from incendiary.xray.utils import tracing_name
 
 from aws_xray_sdk.core import patch, xray_recorder, AsyncAWSXRayRecorder
-from aws_xray_sdk.sdk_config import SDKConfig
+from aws_xray_sdk import global_sdk_config
 
 
 class Incendiary(CaptureMixin):
     config_imported = False
     extra_recorder_configurations = {}
+    app = None
 
     @classmethod
     def load_config(self, settings_object):
@@ -33,12 +34,7 @@ class Incendiary(CaptureMixin):
     @classmethod
     def _handle_error(cls, app, messages):
         error_message = "[XRAY] Tracing was not initialized because: " + ', '.join(messages)
-
-        if not app.config.TRACING_SOFT_FAIL or app.config.TRACING_REQUIRED:
-            error_logger.critical(error_message)
-            raise ImproperlyConfigured(error_message)
-        else:
-            error_logger.warning(error_message)
+        error_logger.warning(error_message)
 
     @classmethod
     def _check_prerequisites(cls, app):
@@ -72,12 +68,14 @@ class Incendiary(CaptureMixin):
     @classmethod
     def init_app(cls, app):
         # checks to see if tracing can be enabled
+        cls.app = app
         cls.load_config(app.config)
         messages = cls._check_prerequisites(app)
 
         if len(messages) == 0:
-            SDKConfig.set_sdk_enabled(True)
-            app.xray_recorder = AsyncAWSXRayRecorder()
+            global_sdk_config.set_sdk_enabled(True)
+            # app.xray_recorder = AsyncAWSXRayRecorder()
+            app.xray_recorder = xray_recorder
 
             cls.setup_middlewares(app)
             cls.setup_client(app)
@@ -86,13 +84,9 @@ class Incendiary(CaptureMixin):
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
             app.plugin_initialized('incendiary', cls)
         else:
-            try:
-                cls._handle_error(app, messages)
-            except ImproperlyConfigured:
-                raise
-            finally:
-                app.config.TRACING_ENABLED = False
-                SDKConfig.set_sdk_enabled(False)
+            cls._handle_error(app, messages)
+            app.config.TRACING_ENABLED = False
+            global_sdk_config.set_sdk_enabled(False)
 
     @classmethod
     def setup_listeners(cls, app):
