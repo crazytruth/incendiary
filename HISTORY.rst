@@ -3,7 +3,13 @@
 History
 -------
 
-0.1.1 (unreleased)
+0.1.2 (unreleased)
+++++++++++++++++++
+
+- Nothing changed yet.
+
+
+0.1.1 (2019-08-27)
 ++++++++++++++++++
 
 - UPDATE: updates behavior for capture to just log if incendiary is not initialized
