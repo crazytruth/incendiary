@@ -1,6 +1,5 @@
 import socket
 
-from insanic.exceptions import ImproperlyConfigured
 from insanic.monitor import MONITOR_ENDPOINTS
 from insanic.services import Service
 
@@ -27,14 +26,15 @@ class Incendiary(CaptureMixin):
         if not self.config_imported:
             for c in dir(config):
                 if c.isupper():
-                    conf = getattr(config, c)
-                    setattr(settings_object, c, conf)
+                    if not hasattr(settings_object, c):
+                        conf = getattr(config, c)
+                        setattr(settings_object, c, conf)
             self.config_imported = True
 
     @classmethod
     def _handle_error(cls, app, messages):
         error_message = "[XRAY] Tracing was not initialized because: " + ', '.join(messages)
-        error_logger.warning(error_message)
+        error_logger.critical(error_message)
 
     @classmethod
     def _check_prerequisites(cls, app):
