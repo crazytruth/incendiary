@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.2 (unreleased)
+0.1.2 (2019-08-30)
 ++++++++++++++++++
 
 - UDPATE: error level for initializing increased to critical
