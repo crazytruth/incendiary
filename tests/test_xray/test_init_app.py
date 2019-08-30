@@ -48,7 +48,7 @@ class TestIncendiaryXRayInitialize():
         if expected == "LOG":
             Incendiary._handle_error(insanic_application, ["Hello"])
             assert len(caplog.records) != 0
-            assert caplog.records[-1].levelname == "WARNING"
+            assert caplog.records[-1].levelname == "CRITICAL"
             assert caplog.records[-1].message == EXPECTED_ERROR_MESSAGE
         elif expected == "EXCEPTION":
             with pytest.raises(ImproperlyConfigured) as e:

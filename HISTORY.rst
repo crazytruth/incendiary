@@ -6,7 +6,8 @@ History
 0.1.2 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- UDPATE: error level for initializing increased to critical
+- FIX: incendiary config overriding vault settings
 
 
 0.1.1 (2019-08-27)
