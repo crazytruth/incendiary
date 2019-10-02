@@ -12,7 +12,7 @@ from incendiary.xray.mixins import CaptureMixin
 from incendiary.xray.sampling import IncendiaryDefaultSampler
 from incendiary.xray.utils import tracing_name
 
-from aws_xray_sdk.core import patch, xray_recorder, AsyncAWSXRayRecorder
+from aws_xray_sdk.core import patch, xray_recorder
 from aws_xray_sdk import global_sdk_config
 
 
@@ -76,10 +76,11 @@ class Incendiary(CaptureMixin):
             global_sdk_config.set_sdk_enabled(True)
             # app.xray_recorder = AsyncAWSXRayRecorder()
             app.xray_recorder = xray_recorder
+            app.xray_recorder.configure(**cls.xray_config(app))
 
             cls.setup_middlewares(app)
             cls.setup_client(app)
-            cls.setup_listeners(app)
+            # cls.setup_listeners(app)
 
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
             app.plugin_initialized('incendiary', cls)
@@ -88,14 +89,14 @@ class Incendiary(CaptureMixin):
             app.config.TRACING_ENABLED = False
             global_sdk_config.set_sdk_enabled(False)
 
-    @classmethod
-    def setup_listeners(cls, app):
-        async def before_server_start_start_tracing(app, loop=None, **kwargs):
-            app.xray_recorder.configure(**cls.xray_config(app))
-
-        # need to configure xray as the first thing that happens so insert into 0
-        if before_server_start_start_tracing not in app.listeners['before_server_start']:
-            app.listeners['before_server_start'].insert(0, before_server_start_start_tracing)
+    # @classmethod
+    # def setup_listeners(cls, app):
+    #     # async def before_server_start_start_tracing(app, loop=None, **kwargs):
+    #     #     app.xray_recorder.configure(**cls.xray_config(app))
+    #
+    #     # need to configure xray as the first thing that happens so insert into 0
+    #     if before_server_start_start_tracing not in app.listeners['before_server_start']:
+    #         app.listeners['before_server_start'].insert(0, before_server_start_start_tracing)
 
     @classmethod
     def setup_client(cls, app):
