@@ -76,11 +76,11 @@ class Incendiary(CaptureMixin):
             global_sdk_config.set_sdk_enabled(True)
             # app.xray_recorder = AsyncAWSXRayRecorder()
             app.xray_recorder = xray_recorder
-            app.xray_recorder.configure(**cls.xray_config(app))
+            # app.xray_recorder.configure(**cls.xray_config(app))
 
             cls.setup_middlewares(app)
             cls.setup_client(app)
-            # cls.setup_listeners(app)
+            cls.setup_listeners(app)
 
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
             app.plugin_initialized('incendiary', cls)
@@ -89,14 +89,23 @@ class Incendiary(CaptureMixin):
             app.config.TRACING_ENABLED = False
             global_sdk_config.set_sdk_enabled(False)
 
-    # @classmethod
-    # def setup_listeners(cls, app):
-    #     # async def before_server_start_start_tracing(app, loop=None, **kwargs):
-    #     #     app.xray_recorder.configure(**cls.xray_config(app))
-    #
-    #     # need to configure xray as the first thing that happens so insert into 0
-    #     if before_server_start_start_tracing not in app.listeners['before_server_start']:
-    #         app.listeners['before_server_start'].insert(0, before_server_start_start_tracing)
+    @classmethod
+    def setup_listeners(cls, app):
+        async def before_server_start_start_tracing(app, loop=None, **kwargs):
+            app.xray_recorder.configure(**cls.xray_config(app))
+
+        # need to configure xray as the first thing that happens so insert into 0
+        if before_server_start_start_tracing not in app.listeners['before_server_start']:
+
+            # need to attach context after insanic's set task factory has been set
+            for i, l in enumerate(app.listeners['before_server_start']):
+                if l.__name__ == "before_server_start_set_task_factory":
+                    insert_index = i + 1
+                    break
+            else:
+                insert_index = 0
+
+            app.listeners['before_server_start'].insert(insert_index, before_server_start_start_tracing)
 
     @classmethod
     def setup_client(cls, app):

@@ -10,7 +10,7 @@ Documentation
 The full documentation is at http://incendiary.rtfd.org."""
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
-version = '0.1.3.dev2'
+version = '0.1.3.dev3'
 
 test_requires = [
     "coverage",

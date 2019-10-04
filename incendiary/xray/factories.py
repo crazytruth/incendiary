@@ -6,7 +6,7 @@ from functools import wraps
 XRAY_CONTEXT_STORAGE = "entities"
 
 def wrap_tracing_task_factory(task_factory):
-    @wraps(task_factory)
+    # @wraps(task_factory)
     def wrapped(loop, coro):
         task = task_factory(loop, coro)
         current_task = asyncio.Task.current_task(loop=loop)
