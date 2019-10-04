@@ -3,6 +3,7 @@ import copy
 
 from functools import wraps
 
+XRAY_CONTEXT_STORAGE = "entities"
 
 def wrap_tracing_task_factory(task_factory):
     @wraps(task_factory)
@@ -12,7 +13,8 @@ def wrap_tracing_task_factory(task_factory):
 
         if current_task is not None and hasattr(current_task, 'context'):
             context = copy.copy(current_task.context)
-            context['entities'] = context['entities'].copy()
+            if XRAY_CONTEXT_STORAGE in context:
+                context[XRAY_CONTEXT_STORAGE] = context[XRAY_CONTEXT_STORAGE].copy()
             setattr(task, 'context', context)
         return task
 
