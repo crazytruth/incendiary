@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.3 (unreleased)
+0.1.3 (2019-10-04)
 ++++++++++++++++++
 
 - FIX: fixes dependency issue with insanic where task manager was being overwritten
