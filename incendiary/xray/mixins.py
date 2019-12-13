@@ -6,6 +6,7 @@ from aws_xray_sdk.core.async_recorder import AsyncSubsegmentContextManager
 from aws_xray_sdk.core.models.dummy_entities import DummySegment
 from aws_xray_sdk.core.models.subsegment import SubsegmentContextManager, subsegment_decorator, is_already_recording
 from aws_xray_sdk.core.exceptions.exceptions import SegmentNotFoundException
+from aws_xray_sdk.core.exceptions import exceptions
 
 from incendiary.loggers import logger, error_logger
 
@@ -44,12 +45,15 @@ class IncendiaryAsyncSubsegmentContextManager(AsyncSubsegmentContextManager):
                         'incendiary' not in self.instance.app.initialized_plugins:
                     error_logger.warning(CAPTURE_WARNING.format(name=func_name))
 
-        return await self.recorder.record_subsegment_async(
-            wrapped, instance, args, kwargs,
-            name=func_name,
-            namespace='local',
-            meta_processor=None,
-        )
+        try:
+            return await self.recorder.record_subsegment_async(
+                wrapped, instance, args, kwargs,
+                name=func_name,
+                namespace='local',
+                meta_processor=None,
+            )
+        except exceptions.AlreadyEndedException:
+            return await wrapped(*args, **kwargs)
 
 
 class CaptureMixin:
