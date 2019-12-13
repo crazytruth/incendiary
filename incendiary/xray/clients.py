@@ -36,6 +36,8 @@ async def begin_subsegment(session, trace_config_ctx, params):
         subsegment = xray_recorder.begin_subsegment(name, REMOTE_NAMESPACE)
     except exceptions.SegmentNotFoundException:
         subsegment = None
+    except exceptions.AlreadyEndedSegment:
+        subsegment = None
 
     # No-op if subsegment is `None` due to `LOG_ERROR`.
     if not subsegment:
