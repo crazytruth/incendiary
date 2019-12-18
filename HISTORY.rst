@@ -3,7 +3,7 @@
 History
 -------
 
-0.1.4 (unreleased)
+0.1.4 (2019-12-18)
 ++++++++++++++++++
 
 - FIX: handles AlreadyEndedException problems when execute http_dispatch in ensure_future task
