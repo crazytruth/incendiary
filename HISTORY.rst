@@ -7,6 +7,7 @@ History
 ++++++++++++++++++
 
 - FIX: fix change wrong exception name AlreadyEndedSegment -> AlreadyEndedException
+- CHORE: backward compatibility for 0.8.3> because request user and service is no longer awaitable
 
 
 0.1.4 (2019-12-18)

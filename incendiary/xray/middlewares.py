@@ -1,5 +1,6 @@
 import traceback
 import ujson as json
+from inspect import isawaitable
 
 from insanic import __version__
 from insanic.conf import settings
@@ -72,7 +73,12 @@ async def after_request(request, response):
         # because calling request.user authenticates, and if
         # authenticators are not set for request, will end not being
         # able to authenticate correctly
-        user = await request.user
+
+        user = request.user
+
+        if isawaitable(user):
+            user = await user
+
         if user.id:
             segment.set_user(user.id)
             segment.put_annotation('user__level', user.level)
