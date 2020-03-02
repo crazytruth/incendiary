@@ -6,7 +6,7 @@ History
 0.1.5 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- FIX: fix change wrong exception name AlreadyEndedSegment -> AlreadyEndedException
 
 
 0.1.4 (2019-12-18)
