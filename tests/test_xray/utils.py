@@ -7,16 +7,15 @@ from aws_xray_sdk.core.sampling.sampler import DefaultSampler
 
 
 class StubbedEmitter(UDPEmitter):
-
-    def __init__(self, daemon_address='127.0.0.1:2000'):
+    def __init__(self, daemon_address="127.0.0.1:2000"):
         super(StubbedEmitter, self).__init__(daemon_address)
         self._local = threading.local()
 
     def send_entity(self, entity):
-        setattr(self._local, 'cache', entity)
+        self._local.cache = entity
 
     def pop(self):
-        if hasattr(self._local, 'cache'):
+        if hasattr(self._local, "cache"):
             entity = self._local.cache
         else:
             entity = None
@@ -26,7 +25,6 @@ class StubbedEmitter(UDPEmitter):
 
 
 class StubbedSampler(DefaultSampler):
-
     def start(self):
         pass
 
@@ -37,6 +35,7 @@ def get_new_stubbed_recorder():
     """
 
     from aws_xray_sdk.core.async_recorder import AsyncAWSXRayRecorder
+
     recorder = AsyncAWSXRayRecorder()
 
     recorder.configure(emitter=StubbedEmitter(), sampler=StubbedSampler())
@@ -51,13 +50,13 @@ def entity_to_dict(trace_entity):
 def _search_entity(entity, name):
     """Helper function to that recursivly looks at subentities
     Returns a serialized entity that matches the name given or None"""
-    if 'name' in entity:
-        my_name = entity['name']
+    if "name" in entity:
+        my_name = entity["name"]
         if my_name == name:
             return entity
         else:
             if "subsegments" in entity:
-                for s in entity['subsegments']:
+                for s in entity["subsegments"]:
                     result = _search_entity(s, name)
                     if result is not None:
                         return result
@@ -68,7 +67,7 @@ def find_subsegment(segment, name):
     """Helper function to find a subsegment by name in the entity tree"""
     segment = jsonpickle.encode(segment, unpicklable=False)
     segment = json.loads(segment)
-    for entity in segment['subsegments']:
+    for entity in segment["subsegments"]:
         result = _search_entity(entity, name)
         if result is not None:
             return result
@@ -79,7 +78,7 @@ def find_subsegment_by_annotation(segment, key, value):
     """Helper function to find a subsegment by annoation key & value in the entity tree"""
     segment = jsonpickle.encode(segment, unpicklable=False)
     segment = json.loads(segment)
-    for entity in segment['subsegments']:
+    for entity in segment["subsegments"]:
         result = _search_entity_by_annotation(entity, key, value)
         if result is not None:
             return result
@@ -89,14 +88,14 @@ def find_subsegment_by_annotation(segment, key, value):
 def _search_entity_by_annotation(entity, key, value):
     """Helper function to that recursivly looks at subentities
     Returns a serialized entity that matches the annoation key & value given or None"""
-    if 'annotations' in entity:
-        if key in entity['annotations']:
-            my_value = entity['annotations'][key]
+    if "annotations" in entity:
+        if key in entity["annotations"]:
+            my_value = entity["annotations"][key]
             if my_value == value:
                 return entity
         else:
             if "subsegments" in entity:
-                for s in entity['subsegments']:
+                for s in entity["subsegments"]:
                     result = _search_entity_by_annotation(s, key, value)
                     if result is not None:
                         return result

@@ -22,18 +22,20 @@ class Incendiary(CaptureMixin):
     app = None
 
     @classmethod
-    def load_config(self, settings_object):
-        if not self.config_imported:
+    def load_config(cls, settings_object):
+        if not cls.config_imported:
             for c in dir(config):
                 if c.isupper():
                     if not hasattr(settings_object, c):
                         conf = getattr(config, c)
                         setattr(settings_object, c, conf)
-            self.config_imported = True
+            cls.config_imported = True
 
     @classmethod
     def _handle_error(cls, app, messages):
-        error_message = "[XRAY] Tracing was not initialized because: " + ', '.join(messages)
+        error_message = (
+            "[XRAY] Tracing was not initialized because: " + ", ".join(messages)
+        )
         error_logger.critical(error_message)
 
     @classmethod
@@ -56,11 +58,14 @@ class Incendiary(CaptureMixin):
             sock.settimeout(1)
             if sock.connect_ex((tracing_host, int(tracing_port))) != 0:
                 messages.append(
-                    f"Could not connect to port on [{tracing_host}:{tracing_port}].")
+                    f"Could not connect to port on [{tracing_host}:{tracing_port}]."
+                )
         except socket.gaierror:
             messages.append(f"Could not resolve host [{tracing_host}].")
         except socket.error as e:  # pragma: no cover
-            messages.append(f"Could not connect to [{tracing_host}:{tracing_port}]: {str(e)}")
+            messages.append(
+                f"Could not connect to [{tracing_host}:{tracing_port}]: {str(e)}"
+            )
         finally:
             sock.close()
         return messages
@@ -83,7 +88,7 @@ class Incendiary(CaptureMixin):
             cls.setup_listeners(app)
 
             patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
-            app.plugin_initialized('incendiary', cls)
+            app.plugin_initialized("incendiary", cls)
         else:
             cls._handle_error(app, messages)
             app.config.TRACING_ENABLED = False
@@ -95,27 +100,36 @@ class Incendiary(CaptureMixin):
             app.xray_recorder.configure(**cls.xray_config(app))
 
         # need to configure xray as the first thing that happens so insert into 0
-        if before_server_start_start_tracing not in app.listeners['before_server_start']:
+        if (
+            before_server_start_start_tracing
+            not in app.listeners["before_server_start"]
+        ):
 
             # need to attach context after insanic's set task factory has been set
-            for i, l in enumerate(app.listeners['before_server_start']):
+            for i, l in enumerate(app.listeners["before_server_start"]):
                 if l.__name__ == "before_server_start_set_task_factory":
                     insert_index = i + 1
                     break
             else:
                 insert_index = 0
 
-            app.listeners['before_server_start'].insert(insert_index, before_server_start_start_tracing)
+            app.listeners["before_server_start"].insert(
+                insert_index, before_server_start_start_tracing
+            )
 
     @classmethod
     def setup_client(cls, app):
-        Service.extra_session_configs = {'trace_configs': [aws_xray_trace_config(xray_recorder=app.xray_recorder)]}
+        Service.extra_session_configs = {
+            "trace_configs": [
+                aws_xray_trace_config(xray_recorder=app.xray_recorder)
+            ]
+        }
 
     @classmethod
     def setup_middlewares(cls, app):
         logger.debug("[XRAY] Initializing xray middleware")
 
-        @app.middleware('request')
+        @app.middleware("request")
         async def start_trace(request):
             for ep in MONITOR_ENDPOINTS:
                 if request.path.endswith(ep):
@@ -123,7 +137,7 @@ class Incendiary(CaptureMixin):
             else:
                 await before_request(request)
 
-        @app.middleware('response')
+        @app.middleware("response")
         async def end_trace(request, response):
             for ep in MONITOR_ENDPOINTS:
                 if request.path.endswith(ep):
@@ -144,7 +158,7 @@ class Incendiary(CaptureMixin):
             daemon_address=f"{app.config.TRACING_HOST}:{app.config.TRACING_PORT}",
             context_missing=app.config.TRACING_CONTEXT_MISSING_STRATEGY,
             streaming_threshold=10,
-            plugins=('ECSPlugin',),
+            plugins=("ECSPlugin",),
         )
 
         config.update(cls.extra_recorder_configurations)

@@ -15,10 +15,10 @@ def _collector_url_from_hostport(secure, host, port):
     `secure` should be a bool.
     """
     if secure:
-        protocol = 'https://'
+        protocol = "https://"
     else:
-        protocol = 'http://'
-    return ''.join([protocol, host, ':', str(port), '/api/v1/spans'])
+        protocol = "http://"
+    return "".join([protocol, host, ":", str(port), "/api/v1/spans"])
 
 
 def _generate_guid():
@@ -31,7 +31,7 @@ def _generate_guid():
 def _id_to_hex(id):
     if id is None:
         return None
-    return '{0:x}'.format(id)
+    return "{0:x}".format(id)
 
 
 def _now_micros():
@@ -69,7 +69,7 @@ def unsigned_hex_to_signed_int(hex_string):
     :param hex_string: the string representation of a zipkin ID
     :returns: signed int representation
     """
-    return struct.unpack('q', struct.pack('Q', int(hex_string, 16)))[0]
+    return struct.unpack("q", struct.pack("Q", int(hex_string, 16)))[0]
 
 
 # Coerce to utf-8 under Python 3.
@@ -81,23 +81,23 @@ def _coerce_to_bytes(val):
     if isinstance(val, bytes):
         return val
     try:
-        return val.encode('utf-8', 'replace')
+        return val.encode("utf-8", "replace")
     except Exception:
         try:
             return bytes(val)
         except Exception:
             # Never let these errors bubble up
-            return '(encoding error)'
+            return "(encoding error)"
 
 
 def _coerce_to_unicode(val):
     if isinstance(val, str):
         return val
     try:
-        return val.decode('utf-8')
+        return val.decode("utf-8")
     except Exception:
         try:
             return str(val)
         except Exception:
             # Never let these errors bubble up
-            return '(encoding error)'
+            return "(encoding error)"

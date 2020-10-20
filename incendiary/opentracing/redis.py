@@ -8,8 +8,8 @@ g_trace_prefix = None
 g_trace_all_classes = True
 
 
-def init_tracing(tracer, trace_all_classes=True, prefix='Redis'):
-    '''
+def init_tracing(tracer, trace_all_classes=True, prefix="Redis"):
+    """
     Set our tracer for Redis. Tracer objects from the
     OpenTracing django/flask/pyramid libraries can be passed as well.
     :param tracer: the tracer object.
@@ -18,9 +18,9 @@ def init_tracing(tracer, trace_all_classes=True, prefix='Redis'):
         is required.
     :param prefix: The prefix for the operation name, if any.
         By default it is set to 'Redis'.
-    '''
+    """
     global g_tracer, g_trace_all_classes, g_trace_prefix
-    if hasattr(tracer, '_tracer'):
+    if hasattr(tracer, "_tracer"):
         tracer = tracer._tracer
 
     g_tracer = tracer
@@ -32,33 +32,33 @@ def init_tracing(tracer, trace_all_classes=True, prefix='Redis'):
 
 
 def trace_client(client):
-    '''
+    """
     Marks a client to be traced. All commands and pipelines executed
     through this client will be traced.
     :param client: the Redis client object.
-    '''
+    """
     _patch_client(client)
 
 
 def trace_pipeline(pipe):
-    '''
+    """
     Marks a pipeline to be traced.
     :param client: the Redis pipeline object to be traced.
     If executed as a transaction, the commands will appear
     under a single 'MULTI' operation.
-    '''
+    """
     _patch_pipe_execute(pipe)
 
 
 def trace_pubsub(pubsub):
-    '''
+    """
     Marks a pubsub object to be traced.
     :param pubsub: the Redis pubsub object to be traced.
     Incoming messages through get_message(), listen() and
     run_in_thread() will appear with an operation named 'SUB'.
     Commands executed on this object through execute_command()
     will be traced too with their respective command name.
-    '''
+    """
     _patch_pubsub(pubsub)
 
 
@@ -67,25 +67,25 @@ def _get_operation_name(operation_name):
         if isinstance(operation_name, bytes):
             operation_name = operation_name.decode()
 
-        operation_name = '{0}/{1}'.format(g_trace_prefix, operation_name)
+        operation_name = "{0}/{1}".format(g_trace_prefix, operation_name)
 
     return operation_name
 
 
 def _normalize_stmt(args):
-    return ' '.join([str(arg) for arg in args])
+    return " ".join([str(arg) for arg in args])
 
 
 def _normalize_stmts(command_stack):
     commands = [_normalize_stmt(command[0]) for command in command_stack]
-    return ';'.join(commands)
+    return ";".join(commands)
 
 
 def _set_base_span_tags(span, stmt):
-    span.set_tag('component', 'redis-py')
-    span.set_tag('db.type', 'redis')
-    span.set_tag('db.statement', stmt)
-    span.set_tag('span.kind', 'client')
+    span.set_tag("component", "redis-py")
+    span.set_tag("db.type", "redis")
+    span.set_tag("db.statement", stmt)
+    span.set_tag("span.kind", "client")
 
 
 def _patch_redis_classes():
@@ -152,14 +152,14 @@ def _patch_pipe_execute(pipe):
             # Nothing to process/handle.
             return execute_method(raise_on_error=raise_on_error)
 
-        span = g_tracer.start_span(_get_operation_name('MULTI'))
+        span = g_tracer.start_span(_get_operation_name("MULTI"))
         _set_base_span_tags(span, _normalize_stmts(pipe.command_stack))
 
         try:
             res = execute_method(raise_on_error=raise_on_error)
         except Exception as exc:
-            span.set_tag('error', 'true')
-            span.set_tag('error.object', exc)
+            span.set_tag("error", "true")
+            span.set_tag("error.object", exc)
             raise
         finally:
             span.finish()
@@ -178,10 +178,10 @@ def _patch_pipe_execute(pipe):
         _set_base_span_tags(span, _normalize_stmt(args))
 
         try:
-            res = immediate_execute_method(*args, **options)
+            immediate_execute_method(*args, **options)
         except Exception as exc:
-            span.set_tag('error', 'true')
-            span.set_tag('error.object', exc)
+            span.set_tag("error", "true")
+            span.set_tag("error.object", exc)
         finally:
             span.finish()
 
@@ -199,14 +199,14 @@ def _patch_pubsub_parse_response(pubsub):
 
     @wraps(parse_response_method)
     def tracing_parse_response(block=True, timeout=0):
-        span = g_tracer.start_span(_get_operation_name('SUB'))
-        _set_base_span_tags(span, '')
+        span = g_tracer.start_span(_get_operation_name("SUB"))
+        _set_base_span_tags(span, "")
 
         try:
             rv = parse_response_method(block=block, timeout=timeout)
         except Exception as exc:
-            span.set_tag('error', 'true')
-            span.set_tag('error.object', exc)
+            span.set_tag("error", "true")
+            span.set_tag("error.object", exc)
             raise
         finally:
             span.finish()
@@ -235,8 +235,8 @@ def _patch_obj_execute_command(redis_obj, is_klass=False):
         try:
             rv = execute_command_method(*args, **kwargs)
         except Exception as exc:
-            span.set_tag('error', 'true')
-            span.set_tag('error.object', exc)
+            span.set_tag("error", "true")
+            span.set_tag("error.object", exc)
             raise
         finally:
             span.finish()

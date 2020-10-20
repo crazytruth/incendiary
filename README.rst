@@ -152,5 +152,3 @@ View release history `here <HISTORY.rst>`_
 
 TODO
 ----
-
-

@@ -1,9 +1,9 @@
-import pkg_resources
-
-__version__ = pkg_resources.get_distribution('incendiary').version
-__author__ = 'Kwang Jin Kim'
-__email__ = 'david@mymusictaste.com'
+__version__ = "0.1.6.dev0"
+__author__ = "Kwang Jin Kim"
+__email__ = "kwangjinkim@gmail.com"
 
 from incendiary.xray.app import Incendiary
 
-__all__ = ['Incendiary', 'OpenTracing']
+__all__ = [
+    "Incendiary",
+]

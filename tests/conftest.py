@@ -5,12 +5,9 @@ from insanic import Insanic
 from insanic.conf import settings
 
 
-
-settings.configure(SERVICE_NAME="iniesta",
-                   GATEWAY_REGISTRATION_ENABLED=False,
-                   MMT_ENV="test")
-
-
+settings.configure(
+    SERVICE_NAME="iniesta", GATEWAY_REGISTRATION_ENABLED=False, MMT_ENV="test"
+)
 
 
 @pytest.fixture(autouse=True)
@@ -35,7 +32,7 @@ def insanic_application():
 def mock_boto(monkeypatch):
     def _mock_send(self, request):
         return {
-            'SamplingRuleRecords': [],
+            "SamplingRuleRecords": [],
         }
 
-    monkeypatch.setattr(Endpoint, '_send', _mock_send)
+    monkeypatch.setattr(Endpoint, "_send", _mock_send)

@@ -1,76 +1,47 @@
-#!/usr/bin/env python
+import os
+import re
 
 from setuptools import setup, find_packages
 
-readme = open('README.rst').read()
-doclink = """
-Documentation
--------------
+here = os.path.dirname(__file__)
 
-The full documentation is at http://incendiary.rtfd.org."""
-history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
-version = '0.1.6.dev0'
+def read(fname):
+    """
+    Read given file's content.
+    :param str fname: file name
+    :returns: file contents
+    :rtype: str
+    """
+    return open(os.path.join(here, fname)).read()
 
-test_requires = [
-    "coverage",
-    'pytest',
-    "pytest-cov",
-    'pytest-redis',
-    'pytest-sanic',
-    'pytest-cov',
-    'pytest-sugar',
-    "pytest-xdist",
-    "pytest-flake8",
-    'boto3==1.9.99',
-    'requests',
-    'aioresponses'
-]
 
-xray_requirements = [
-    'aws-xray-sdk==2.4.2'
-]
+def get_meta(meta):
+    search_string = f'__{meta}__ = "(.*?)"'
 
-opentracing_requirements = [
-    'basictracer', 'thriftpy',
-]
+    with open("incendiary/__init__.py", encoding="utf8") as f:
+        return re.search(search_string, f.read()).group(1)
 
-docs_requirements = ['sphinx', 'sphinx_rtd_theme']
-
-cli_requirements = ["Click>=6.0"]
 
 setup(
-    name='incendiary',
-    version=version,
-    description='tracing for insanic',
-    long_description=readme + '\n\n' + doclink + '\n\n' + history,
-    author_email='david@mymusictaste.com',
-    url='https://github.com/MyMusicTaste/incendiary',
-    author='Kwang Jin Kim',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    name="incendiary",
+    version=get_meta("version"),
+    description="tracing for insanic",
+    long_description=read("README.rst"),
+    author=get_meta("author"),
+    author_email=get_meta("email"),
+    url="https://github.com/crazytruth/incendiary",
+    packages=find_packages(exclude=["docs", "tests*"]),
     include_package_data=True,
-    install_requires=[
-        'insanic>=0.8.1',
-    ],
-    tests_require=test_requires,
-    extras_require={
-        "xray": xray_requirements,
-        "opentracing": opentracing_requirements,
-        "docs": docs_requirements,
-        "cli": cli_requirements,
-        "development": test_requires +
-                       xray_requirements +
-                       opentracing_requirements +
-                       docs_requirements +
-                       cli_requirements,
-        "release": ["zest.releaser[recommended]", "flake8"],
-    },
+    install_requires=["insanic-framework<=0.10.0", "aws-xray-sdk"],
     classifiers=[
-    'Development Status :: 3 - Alpha',
-    'License :: OSI Approved :: MIT License',
-    'Programming Language :: Python :: 3.6',
-        'Intended Audience :: Developers',
+        "Development Status :: 3 - Alpha",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Intended Audience :: Developers",
     ],
-    keywords='opentracing zipkin msa microservice xray',
-    license='MIT',
+    keywords="opentracing zipkin msa microservice xray tracing",
+    license="MIT",
 )

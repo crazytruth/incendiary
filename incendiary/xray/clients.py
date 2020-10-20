@@ -15,12 +15,12 @@ from insanic.utils.obfuscating import get_safe_dict
 
 # All aiohttp calls will entail outgoing HTTP requests, only in some ad-hoc
 # exceptions the namespace will be flip back to local.
-REMOTE_NAMESPACE = 'remote'
-LOCAL_NAMESPACE = 'local'
+REMOTE_NAMESPACE = "remote"
+LOCAL_NAMESPACE = "local"
 LOCAL_EXCEPTIONS = (
     aiohttp.client_exceptions.ClientConnectionError,
     # DNS issues
-    OSError
+    OSError,
 )
 
 
@@ -29,12 +29,20 @@ def _get_recorder(ctx):
         return ctx.xray_recorder
     return xray_recorder
 
+
 async def begin_subsegment(session, trace_config_ctx, params):
-    name = trace_config_ctx.name if trace_config_ctx.name else strip_url(str(params.url))
+    name = (
+        trace_config_ctx.name
+        if trace_config_ctx.name
+        else strip_url(str(params.url))
+    )
     xray_recorder = _get_recorder(trace_config_ctx)
     try:
         subsegment = xray_recorder.begin_subsegment(name, REMOTE_NAMESPACE)
-    except (exceptions.SegmentNotFoundException, exceptions.AlreadyEndedException):
+    except (
+        exceptions.SegmentNotFoundException,
+        exceptions.AlreadyEndedException,
+    ):
         subsegment = None
 
     # No-op if subsegment is `None` due to `LOG_ERROR`.
@@ -57,7 +65,6 @@ async def end_subsegment(session, trace_config_ctx, params):
     :return:
     """
 
-
     if trace_config_ctx.give_up:
         return
     xray_recorder = _get_recorder(trace_config_ctx)
@@ -70,7 +77,7 @@ async def end_subsegment(session, trace_config_ctx, params):
             resp = await params.response.text()
             resp = try_json_decode(resp)
             resp = get_safe_dict(resp)
-            subsegment.put_annotation('response', json.dumps(resp))
+            subsegment.put_annotation("response", json.dumps(resp))
 
     xray_recorder.end_subsegment()
 
@@ -93,7 +100,7 @@ async def end_subsegment_with_exception(session, trace_config_ctx, params):
     if subsegment.sampled:
         subsegment.add_exception(
             params.exception,
-            traceback.extract_stack(limit=xray_recorder._max_trace_back)
+            traceback.extract_stack(limit=xray_recorder._max_trace_back),
         )
 
         if isinstance(params.exception, LOCAL_EXCEPTIONS):
@@ -113,10 +120,12 @@ def aws_xray_trace_config(*, xray_recorder=None, name=None):
         return SimpleNamespace(
             xray_recorder=xray_recorder,
             name=name,
-            trace_request_ctx=trace_request_ctx
+            trace_request_ctx=trace_request_ctx,
         )
 
-    trace_config = aiohttp.TraceConfig(trace_config_ctx_factory=_trace_config_ctx_factory)
+    trace_config = aiohttp.TraceConfig(
+        trace_config_ctx_factory=_trace_config_ctx_factory
+    )
     trace_config.on_request_start.append(begin_subsegment)
     trace_config.on_request_end.append(end_subsegment)
     trace_config.on_request_exception.append(end_subsegment_with_exception)

@@ -1,9 +1,8 @@
 import asyncio
 import copy
 
-from functools import wraps
-
 XRAY_CONTEXT_STORAGE = "entities"
+
 
 def wrap_tracing_task_factory(task_factory):
     # @wraps(task_factory)
@@ -11,11 +10,13 @@ def wrap_tracing_task_factory(task_factory):
         task = task_factory(loop, coro)
         current_task = asyncio.Task.current_task(loop=loop)
 
-        if current_task is not None and hasattr(current_task, 'context'):
+        if current_task is not None and hasattr(current_task, "context"):
             context = copy.copy(current_task.context)
             if XRAY_CONTEXT_STORAGE in context:
-                context[XRAY_CONTEXT_STORAGE] = context[XRAY_CONTEXT_STORAGE].copy()
-            setattr(task, 'context', context)
+                context[XRAY_CONTEXT_STORAGE] = context[
+                    XRAY_CONTEXT_STORAGE
+                ].copy()
+            task.context = context
         return task
 
     return wrapped

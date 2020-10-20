@@ -38,21 +38,35 @@ async def before_request(request):
 
     if segment.sampled:
         segment.save_origin_trace_header(xray_header)
-        segment.put_annotation('insanic_version', __version__)
-        segment.put_annotation("service_version", settings.get('SERVICE_VERSION'))
+        segment.put_annotation("insanic_version", __version__)
+        segment.put_annotation(
+            "service_version", settings.get("SERVICE_VERSION")
+        )
         segment.put_http_meta(http.URL, request.url)
         segment.put_http_meta(http.METHOD, request.method)
-        segment.put_http_meta(http.USER_AGENT, headers.get('User-Agent'))
+        segment.put_http_meta(http.USER_AGENT, headers.get("User-Agent"))
 
-        client_ip = headers.get(settings.FORWARDED_FOR_HEADER) or headers.get('HTTP_X_FORWARDED_FOR')
+        client_ip = headers.get(settings.FORWARDED_FOR_HEADER) or headers.get(
+            "HTTP_X_FORWARDED_FOR"
+        )
         if client_ip:
             segment.put_http_meta(http.CLIENT_IP, client_ip)
             segment.put_http_meta(http.X_FORWARDED_FOR, True)
         else:
             segment.put_http_meta(http.CLIENT_IP, request.remote_addr)
 
-        attributes = ['args', 'content_type', 'cookies', 'data',
-                      'host', 'ip', 'method', 'path', 'scheme', 'url', ]
+        attributes = [
+            "args",
+            "content_type",
+            "cookies",
+            "data",
+            "host",
+            "ip",
+            "method",
+            "path",
+            "scheme",
+            "url",
+        ]
         for attr in attributes:
             if hasattr(request, attr):
                 payload = getattr(request, attr)
@@ -81,17 +95,17 @@ async def after_request(request, response):
 
         if user.id:
             segment.set_user(user.id)
-            segment.put_annotation('user__level', user.level)
+            segment.put_annotation("user__level", user.level)
 
         segment.put_http_meta(http.STATUS, response.status)
 
-        cont_len = response.headers.get('Content-Length')
+        cont_len = response.headers.get("Content-Length")
         # truncate response if too lo
-        segment.put_annotation('response', response.body.decode()[:1000])
+        segment.put_annotation("response", response.body.decode()[:1000])
         if cont_len:
             segment.put_http_meta(http.CONTENT_LENGTH, int(cont_len))
 
-        if hasattr(response, 'exception'):
+        if hasattr(response, "exception"):
             stack = traceback.extract_stack(limit=xray_recorder.max_trace_back)
             segment.add_exception(response.exception, stack)
 

@@ -13,7 +13,7 @@ class IncendiaryDefaultSampler(DefaultSampler):
         "http_method": str,
         "url_path": str,
         "fixed_target": int,
-        "rate": float
+        "rate": float,
     }
 
     def __init__(self, app):
@@ -36,9 +36,9 @@ class IncendiaryDefaultSampler(DefaultSampler):
             rules.update({"default": {"fixed_target": 0, "rate": 0}})
         return rules
 
-
-    def calculate_sampling_decision(self, trace_header, recorder,
-                                    service_name, method, path):
+    def calculate_sampling_decision(
+        self, trace_header, recorder, service_name, method, path
+    ):
         """
         Return 1 if should sample and 0 if should not.
         The sampling decision coming from ``trace_header`` always has
@@ -47,7 +47,7 @@ class IncendiaryDefaultSampler(DefaultSampler):
         in the recorder. If not enabled it returns 1. Otherwise it uses
         sampling rule to decide.
         """
-        if trace_header.sampled is not None and trace_header.sampled != '?':
+        if trace_header.sampled is not None and trace_header.sampled != "?":
             logger.debug("Sample decision: from trace headers.")
             return trace_header.sampled
         elif not self.app.config.TRACING_ENABLED:
@@ -56,13 +56,7 @@ class IncendiaryDefaultSampler(DefaultSampler):
         elif not recorder.sampling:
             logger.debug("Sample decision: from recorder sampling")
             return 1
-        elif self.should_trace(
-                sampling_req=
-                {
-                    "method": method,
-                    "path": path
-                }
-        ):
+        elif self.should_trace(sampling_req={"method": method, "path": path}):
             logger.debug("Sample decision: from sampler rules")
             return 1
         else:

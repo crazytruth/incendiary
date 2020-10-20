@@ -9,7 +9,7 @@ from thriftpy.transport import TMemoryBuffer
 
 from incendiary.util import unsigned_hex_to_signed_int
 
-thrift_filepath = os.path.join(os.path.dirname(__file__), 'zipkinCore.thrift')
+thrift_filepath = os.path.join(os.path.dirname(__file__), "zipkinCore.thrift")
 zipkin_core = thriftpy.load(thrift_filepath, module_name="zipkinCore_thrift")
 
 dummy_endpoint = zipkin_core.Endpoint()
@@ -36,14 +36,11 @@ def create_binary_annotation(key, value, annotation_type, host):
     :returns: zipkin binary annotation object
     """
     return zipkin_core.BinaryAnnotation(
-        key=key,
-        value=value,
-        annotation_type=annotation_type,
-        host=host,
+        key=key, value=value, annotation_type=annotation_type, host=host,
     )
 
 
-def create_endpoint(port=0, service_name='unknown', host=None):
+def create_endpoint(port=0, service_name="unknown", host=None):
     """Create a zipkin Endpoint object.
     An Endpoint object holds information about the network context of a span.
     :param port: int value of the port. Defaults to 0
@@ -55,14 +52,12 @@ def create_endpoint(port=0, service_name='unknown', host=None):
     if host is None:
         host = socket.gethostbyname(socket.gethostname())
     # Convert ip address to network byte order
-    ipv4 = struct.unpack('!i', socket.inet_aton(host))[0]
+    ipv4 = struct.unpack("!i", socket.inet_aton(host))[0]
     # Zipkin passes unsigned values in signed types because Thrift has no
     # unsigned types, so we have to convert the value.
-    port = struct.unpack('h', struct.pack('H', port))[0]
+    port = struct.unpack("h", struct.pack("H", port))[0]
     return zipkin_core.Endpoint(
-        ipv4=ipv4,
-        port=port,
-        service_name=service_name,
+        ipv4=ipv4, port=port, service_name=service_name,
     )
 
 
@@ -74,9 +69,7 @@ def copy_endpoint_with_new_service_name(endpoint, service_name):
     :returns: zipkin Endpoint object
     """
     return zipkin_core.Endpoint(
-        ipv4=endpoint.ipv4,
-        port=endpoint.port,
-        service_name=service_name,
+        ipv4=endpoint.ipv4, port=endpoint.port, service_name=service_name,
     )
 
 
@@ -114,12 +107,12 @@ def binary_annotation_list_builder(binary_annotations, host):
 
 
 def create_span(
-        span_id,
-        parent_span_id,
-        trace_id,
-        span_name,
-        annotations,
-        binary_annotations,
+    span_id,
+    parent_span_id,
+    trace_id,
+    span_name,
+    annotations,
+    binary_annotations,
 ):
     """Takes a bunch of span attributes and returns a thriftpy representation
     of the span.

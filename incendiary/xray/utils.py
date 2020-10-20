@@ -28,4 +28,6 @@ def abbreviate_for_xray(payload):
 def get_safe_settings():
     "Returns a dictionary of the settings module, with sensitive settings blurred out."
 
-    return get_safe_dict({k: getattr(settings, k) for k in dir(settings) if k.isupper()})
+    return get_safe_dict(
+        {k: getattr(settings, k) for k in dir(settings) if k.isupper()}
+    )

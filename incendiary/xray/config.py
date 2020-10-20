@@ -1,4 +1,4 @@
-TRACING_HOST = 'xray'
+TRACING_HOST = "xray"
 TRACING_PORT = 2000
 
 # if true then tracing is enabled with this aplication
@@ -29,6 +29,6 @@ SAMPLING_RULES = {
     ],
     "default": {
         "fixed_target": DEFAULT_SAMPLING_FIXED_TARGET,
-        "rate": DEFAULT_SAMPLING_RATE
-    }
+        "rate": DEFAULT_SAMPLING_RATE,
+    },
 }

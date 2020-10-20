@@ -8,7 +8,6 @@ from incendiary.xray.contexts import IncendiaryAsyncContext
 
 
 class TestCaptureAsync:
-
     @Incendiary.capture_async()
     async def async_function(self):
         self.counter += 1
@@ -24,7 +23,9 @@ class TestCaptureAsync:
 
     @Incendiary.capture_async("super_gather")
     async def async_super_gather(self):
-        await asyncio.gather(*[self.async_main_gather(self.async_function) for _ in range(10)])
+        await asyncio.gather(
+            *[self.async_main_gather(self.async_function) for _ in range(10)]
+        )
 
     @pytest.fixture()
     def factory_xray_context(self, loop):
@@ -37,11 +38,13 @@ class TestCaptureAsync:
     @pytest.fixture()
     def configured_xray_recorder(self, factory_xray_context):
         self.counter = 0
-        xray_recorder.configure(service="test", sampling=False,
-                                context=factory_xray_context,
-                                # emitter=StubbedEmitter()
-                                daemon_address=f"localhost:2000",
-                                )
+        xray_recorder.configure(
+            service="test",
+            sampling=False,
+            context=factory_xray_context,
+            # emitter=StubbedEmitter()
+            daemon_address="localhost:2000",
+        )
         return xray_recorder
 
     async def test_capture_async(self, configured_xray_recorder, loop):
@@ -57,7 +60,9 @@ class TestCaptureAsync:
 
     async def test_capture_async_gather(self, configured_xray_recorder, loop):
 
-        segment = configured_xray_recorder.begin_segment("test_capture_async_gather")
+        segment = configured_xray_recorder.begin_segment(
+            "test_capture_async_gather"
+        )
         configured_xray_recorder.context.put_segment(segment)
 
         await asyncio.gather(*[self.async_function() for _ in range(10)])
@@ -68,12 +73,18 @@ class TestCaptureAsync:
 
         configured_xray_recorder.end_segment()
 
-    async def test_capture_async_gather_nested(self, configured_xray_recorder, loop):
+    async def test_capture_async_gather_nested(
+        self, configured_xray_recorder, loop
+    ):
 
-        segment = configured_xray_recorder.begin_segment('test_capture_async_gather_nested')
+        segment = configured_xray_recorder.begin_segment(
+            "test_capture_async_gather_nested"
+        )
         configured_xray_recorder.context.put_segment(segment)
 
-        await asyncio.gather(*[self.async_main_gather(self.async_function) for _ in range(10)])
+        await asyncio.gather(
+            *[self.async_main_gather(self.async_function) for _ in range(10)]
+        )
 
         assert len(segment.subsegments) == 10
 
@@ -88,9 +99,13 @@ class TestCaptureAsync:
             #     assert sss.parent_segment is ss
         configured_xray_recorder.end_segment()
 
-    async def test_capture_async_gather_triple_nested(self, configured_xray_recorder, loop):
+    async def test_capture_async_gather_triple_nested(
+        self, configured_xray_recorder, loop
+    ):
 
-        segment = configured_xray_recorder.begin_segment('test_capture_async_gather_triple_nested')
+        segment = configured_xray_recorder.begin_segment(
+            "test_capture_async_gather_triple_nested"
+        )
 
         await asyncio.gather(*[self.async_super_gather() for _ in range(10)])
 
@@ -111,6 +126,7 @@ class TestCaptureAsync:
     async def test_capture_async_without_incendiary_initialize(self, caplog):
         from incendiary.loggers import error_logger
         from incendiary.xray.mixins import CAPTURE_WARNING
+
         error_logger.setLevel("DEBUG")
 
         @Incendiary.capture_async()
@@ -123,6 +139,7 @@ class TestCaptureAsync:
 
     def test_capture_without_incendiary_initialize(self, caplog):
         from incendiary.loggers import error_logger
+
         error_logger.setLevel("DEBUG")
 
         @Incendiary.capture()

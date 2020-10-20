@@ -27,8 +27,8 @@ from incendiary.thrift import create_endpoint
 from . import constants, util
 
 STANDARD_ANNOTATIONS = {
-    'client': {'cs': [], 'cr': []},
-    'server': {'ss': [], 'sr': []},
+    "client": {"cs": [], "cr": []},
+    "server": {"ss": [], "sr": []},
 }
 STANDARD_ANNOTATIONS_KEYS = frozenset(STANDARD_ANNOTATIONS.keys())
 
@@ -36,6 +36,7 @@ STANDARD_ANNOTATIONS_KEYS = frozenset(STANDARD_ANNOTATIONS.keys())
 # logger = logging.getLogger('network')
 # logger = logging.getLogger('incendiary')
 # logger.setLevel(logging.DEBUG)
+
 
 class ContextFilter(logging.Filter):
     def filter(self, record):
@@ -56,21 +57,25 @@ class ZipkinRecorder(SpanRecorder):
     :param port: The port number of the service. Defaults to 0.
     """
 
-    def __init__(self,
-                 service_name=None,
-                 collector_host='localhost',
-                 collector_port=9411,
-                 max_span_records=constants.DEFAULT_MAX_SPAN_RECORDS,
-                 periodic_flush_seconds=constants.FLUSH_PERIOD_SECS,
-                 verbosity=0,
-                 include=('client', 'server'),
-                 port=0,
-                 certificate_verification=True):
+    def __init__(
+        self,
+        service_name=None,
+        collector_host="localhost",
+        collector_port=9411,
+        max_span_records=constants.DEFAULT_MAX_SPAN_RECORDS,
+        periodic_flush_seconds=constants.FLUSH_PERIOD_SECS,
+        verbosity=0,
+        include=("client", "server"),
+        port=0,
+        certificate_verification=True,
+    ):
         self.verbosity = verbosity
 
         if certificate_verification is False:
-            warnings.warn('SSL CERTIFICATE VERIFICATION turned off. '
-                          'ALL FUTURE HTTPS calls will be unverified.')
+            warnings.warn(
+                "SSL CERTIFICATE VERIFICATION turned off. "
+                "ALL FUTURE HTTPS calls will be unverified."
+            )
             ssl._create_default_https_context = ssl._create_unverified_context
 
         if service_name is None:
@@ -80,18 +85,20 @@ class ZipkinRecorder(SpanRecorder):
 
         if not set(include).issubset(STANDARD_ANNOTATIONS_KEYS):
             raise Exception(
-                'Only %s are supported as annotations' %
-                STANDARD_ANNOTATIONS_KEYS
+                "Only %s are supported as annotations"
+                % STANDARD_ANNOTATIONS_KEYS
             )
         else:
             # get a list of all of the mapped annotations
             self.annotation_filter = set()
             for include_name in include:
-                self.annotation_filter.update(STANDARD_ANNOTATIONS[include_name])
+                self.annotation_filter.update(
+                    STANDARD_ANNOTATIONS[include_name]
+                )
 
-        self._collector_url = util._collector_url_from_hostport(False,
-                                                                collector_host,
-                                                                collector_port)
+        self._collector_url = util._collector_url_from_hostport(
+            False, collector_host, collector_port
+        )
         self._mutex = threading.Lock()
         self._span_records = []
         self._max_span_records = max_span_records
@@ -106,16 +113,18 @@ class ZipkinRecorder(SpanRecorder):
         self._flush_thread = None
         if self._periodic_flush_seconds <= 0:
             warnings.warn(
-                'Runtime(periodic_flush_seconds={0}) means we will never'
-                ' flush to zipkin_ot unless explicitly requested.'.format(
-                    self._periodic_flush_seconds))
+                "Runtime(periodic_flush_seconds={0}) means we will never"
+                " flush to zipkin_ot unless explicitly requested.".format(
+                    self._periodic_flush_seconds
+                )
+            )
 
         self._logger = None
 
     @property
     def logger(self):
         if self._logger is None:
-            self._logger = logging.getLogger('network')
+            self._logger = logging.getLogger("network")
             self._logger.addFilter(ContextFilter())
         return self._logger
 
@@ -127,11 +136,11 @@ class ZipkinRecorder(SpanRecorder):
         We do these things lazily because things like `tornado` break if the
         background flush thread starts before `fork()` calls happen.
         """
-        if ((self._periodic_flush_seconds > 0) and
-                (self._flush_thread is None)):
+        if (self._periodic_flush_seconds > 0) and (self._flush_thread is None):
             self._flush_thread = threading.Thread(
                 target=self._flush_periodically,
-                name=constants.FLUSH_THREAD_NAME)
+                name=constants.FLUSH_THREAD_NAME,
+            )
             self._flush_thread.daemon = True
             self._flush_thread.start()
 
@@ -186,27 +195,26 @@ class ZipkinRecorder(SpanRecorder):
                 binary_annotations[key] = util._coerce_str(span.tags[key])
 
         for log in span.logs:
-            event = log.key_values.get('event') or ''
+            event = log.key_values.get("event") or ""
             if len(event) > 0:
                 # Don't allow for arbitrarily long log messages.
                 if sys.getsizeof(event) > constants.MAX_LOG_MEMORY:
-                    event = event[:constants.MAX_LOG_LEN]
-            payload = log.key_values.get('payload')
-            if event == 'include':
+                    event = event[: constants.MAX_LOG_LEN]
+            payload = log.key_values.get("payload")
+            if event == "include":
                 annotation_filter = set()
                 for include_name in payload:
                     annotation_filter.update(STANDARD_ANNOTATIONS[include_name])
             else:
-                binary_annotations["%s@%s" % (event, str(log.timestamp))] = payload
+                binary_annotations[
+                    "%s@%s" % (event, str(log.timestamp))
+                ] = payload
 
         # To get a full span we just set cs=sr and ss=cr.
-        full_annotations = {
-            'cs': span.start_time,
-            'sr': span.start_time
-        }
+        full_annotations = {"cs": span.start_time, "sr": span.start_time}
         if span.duration != -1:
-            full_annotations['ss'] = span.start_time + span.duration
-            full_annotations['cr'] = full_annotations['ss']
+            full_annotations["ss"] = span.start_time + span.duration
+            full_annotations["cr"] = full_annotations["ss"]
 
         # But we filter down if we only want to emit some of the annotations
         filtered_annotations = {}
@@ -216,9 +224,7 @@ class ZipkinRecorder(SpanRecorder):
 
         annotations.update(filtered_annotations)
 
-        thrift_annotations = annotation_list_builder(
-            annotations, self.endpoint
-        )
+        thrift_annotations = annotation_list_builder(annotations, self.endpoint)
         thrift_binary_annotations = binary_annotation_list_builder(
             binary_annotations, self.endpoint
         )
@@ -295,8 +301,9 @@ class ZipkinRecorder(SpanRecorder):
             self._span_records = []
 
         try:
-            self._finest("Attempting to send records to collector: {0}", (
-                span_records,))
+            self._finest(
+                "Attempting to send records to collector: {0}", (span_records,)
+            )
 
             self._finest("encoded span: {0}", (span_records,))
 
@@ -307,7 +314,7 @@ class ZipkinRecorder(SpanRecorder):
             args = {
                 "url": self._collector_url,
                 "data": body,
-                "headers": {'Content-Type': 'application/x-thrift'}
+                "headers": {"Content-Type": "application/x-thrift"},
             }
             if connection:
                 r = connection.post(**args)
@@ -316,8 +323,9 @@ class ZipkinRecorder(SpanRecorder):
 
             r.raise_for_status()
 
-            self._finest("Received response from collector: {0}",
-                         (r.status_code,))
+            self._finest(
+                "Received response from collector: {0}", (r.status_code,)
+            )
 
             # Return whether we sent any span data
             return len(span_records) > 0
@@ -330,7 +338,8 @@ class ZipkinRecorder(SpanRecorder):
 
             self._fine(
                 "Caught exception during report: {0}, stack trace: {1}",
-                (e, traceback.format_exc()))
+                (e, traceback.format_exc()),
+            )
             self._restore_spans(span_records)
             return False
 
@@ -379,7 +388,7 @@ class ZipkinRecorder(SpanRecorder):
             if len(self._span_records) >= self._max_span_records:
                 return
             combined = span_records + self._span_records
-            self._span_records = combined[-self._max_span_records:]
+            self._span_records = combined[-self._max_span_records :]
 
 
 """
