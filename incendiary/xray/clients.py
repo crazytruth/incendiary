@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 import aiohttp
 import traceback
 import ujson as json
@@ -10,11 +12,12 @@ from aws_xray_sdk.core.models import http
 from aws_xray_sdk.ext.util import inject_trace_header, strip_url
 
 from insanic import status
-from insanic.utils import try_json_decode
-from insanic.utils.obfuscating import get_safe_dict
+
 
 # All aiohttp calls will entail outgoing HTTP requests, only in some ad-hoc
 # exceptions the namespace will be flip back to local.
+from incendiary.xray.utils import get_safe_dict
+
 REMOTE_NAMESPACE = "remote"
 LOCAL_NAMESPACE = "local"
 LOCAL_EXCEPTIONS = (
@@ -74,8 +77,10 @@ async def end_subsegment(session, trace_config_ctx, params):
         subsegment.put_http_meta(http.STATUS, params.response.status)
 
         if params.response.status >= status.HTTP_400_BAD_REQUEST:
-            resp = await params.response.text()
-            resp = try_json_decode(resp)
+            try:
+                resp = params.response.json()
+            except JSONDecodeError:
+                resp = params.response.text
             resp = get_safe_dict(resp)
             subsegment.put_annotation("response", json.dumps(resp))
 

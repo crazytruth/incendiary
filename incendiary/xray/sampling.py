@@ -21,15 +21,8 @@ class IncendiaryDefaultSampler(DefaultSampler):
         super().__init__()
         self._local_sampler = LocalSampler(self.local_rules)
 
-    # @cached_property
-    # @property
-    # def sampling_rules(self):
-    #
-    #
-    #     return rules
-    #
     @property
-    def local_rules(self):
+    def local_rules(self) -> dict:
         rules = copy.deepcopy(self.app.config.SAMPLING_RULES)
         if not self.app.config.TRACING_ENABLED:
             rules.update({"rules": []})

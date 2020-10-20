@@ -6,13 +6,17 @@ from insanic.conf import settings
 
 
 settings.configure(
-    SERVICE_NAME="iniesta", GATEWAY_REGISTRATION_ENABLED=False, MMT_ENV="test"
+    SERVICE_NAME="tracer",
+    AWS_ACCESS_KEY_ID="testing",
+    AWS_SECRET_ACCESS_KEY="testing",
+    AWS_DEFAULT_REGION="us-east-1",
+    ENVIRONMENT="tests",
 )
 
 
 @pytest.fixture(autouse=True)
 def insanic_application():
-    app = Insanic("trace")
+    app = Insanic("trace", version="0.1.0")
 
     yield app
 

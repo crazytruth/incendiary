@@ -4,9 +4,8 @@ from inspect import isawaitable
 
 from insanic import __version__
 from insanic.conf import settings
-from insanic.utils.obfuscating import get_safe_dict
 
-from incendiary.xray.utils import abbreviate_for_xray
+from incendiary.xray.utils import abbreviate_for_xray, get_safe_dict
 
 from aws_xray_sdk.core.models import http
 from aws_xray_sdk.ext.util import calculate_segment_name, construct_xray_header

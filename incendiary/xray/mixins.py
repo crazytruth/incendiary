@@ -1,3 +1,5 @@
+from typing import Optional
+
 from aws_xray_sdk import global_sdk_config
 from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core.async_recorder import AsyncSubsegmentContextManager
@@ -69,7 +71,9 @@ class IncendiaryAsyncSubsegmentContextManager(AsyncSubsegmentContextManager):
 
 class CaptureMixin:
     @classmethod
-    def capture_async(cls, name=None):
+    def capture_async(
+        cls, name: Optional[str] = None
+    ) -> IncendiaryAsyncSubsegmentContextManager:
         """
         A decorator that records enclosed function in a subsegment.
         It only works with asynchronous function
@@ -82,10 +86,11 @@ class CaptureMixin:
         )
 
     @classmethod
-    def capture(cls, name=None):
+    def capture(cls, name: Optional[str] = None) -> SubsegmentContextManager:
         """
         Return a subsegment context manger.
-        :param str name: the name of the subsegment. If not specified the function name will be used.
+
+        :param name: The name of the subsegment. If not specified the function name will be used.
         """
         return SubsegmentContextManager(xray_recorder, name=name)
 

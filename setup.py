@@ -24,7 +24,7 @@ def get_meta(meta):
 
 
 setup(
-    name="incendiary",
+    name="insanic-incendiary",
     version=get_meta("version"),
     description="tracing for insanic",
     long_description=read("README.rst"),
@@ -33,7 +33,7 @@ setup(
     url="https://github.com/crazytruth/incendiary",
     packages=find_packages(exclude=["docs", "tests*"]),
     include_package_data=True,
-    install_requires=["insanic-framework<=0.10.0", "aws-xray-sdk"],
+    install_requires=["insanic-framework>=0.9.0,<=0.10.0", "aws-xray-sdk"],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "License :: OSI Approved :: MIT License",

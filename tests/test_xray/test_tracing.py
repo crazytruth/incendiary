@@ -8,8 +8,8 @@ from insanic.conf import settings
 
 from insanic.exceptions import BadRequest
 from insanic.loading import get_service
-from insanic.responses import json_response
 from insanic.views import InsanicView
+from sanic.response import json
 
 from incendiary.xray.app import Incendiary
 
@@ -103,7 +103,7 @@ class TestTracing:
                     traceback.print_exc()
                     raise
 
-                return json_response({"i am": "service_2"}, status=201)
+                return json({"i am": "service_2"}, status=201)
 
         class ErrorView(InsanicView):
             authentication_classes = []
