@@ -1,13 +1,12 @@
 import pytest
 import logging
 
-from aiohttp.tracing import TraceConfig
 from aws_xray_sdk.core import AsyncAWSXRayRecorder
 
 from insanic.exceptions import ImproperlyConfigured
-from insanic.services import Service
 
 from incendiary.xray.app import Incendiary
+from incendiary.xray.services import IncendiaryService
 
 logger = logging.getLogger(__name__)
 
@@ -93,11 +92,10 @@ class TestIncendiaryXRayInitialize:
         insanic_application.xray_recorder = AsyncAWSXRayRecorder()
 
         Incendiary.setup_client(insanic_application)
+        from insanic.services.registry import registry
 
-        assert "trace_configs" in Service.extra_session_configs
-        assert isinstance(
-            Service.extra_session_configs["trace_configs"][0], TraceConfig
-        )
+        assert registry.service_class == IncendiaryService
+        assert hasattr(registry.service_class, "xray_recorder")
 
     def test_init(self, insanic_application, monkeypatch):
         def mock_check_prerequisites(*args, **kwargs):
@@ -116,10 +114,10 @@ class TestIncendiaryXRayInitialize:
             m.__name__ for m in insanic_application.response_middleware
         ]
 
-        assert "trace_configs" in Service.extra_session_configs
-        assert isinstance(
-            Service.extra_session_configs["trace_configs"][0], TraceConfig
-        )
+        from insanic.services.registry import registry
+
+        assert registry.service_class == IncendiaryService
+        assert hasattr(registry.service_class, "xray_recorder")
         assert (
             insanic_application.listeners["before_server_start"][1].__name__
             == "before_server_start_start_tracing"

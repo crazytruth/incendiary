@@ -73,7 +73,10 @@ class ExceptionView(InsanicView):
 
             try:
                 await service.http_dispatch(
-                    "GET", "/trace_error_2", include_status_code=True
+                    "GET",
+                    "/trace_error_2",
+                    include_status_code=True,
+                    response_timeout=1,
                 )
             except ResponseTimeoutError:
 

@@ -1,18 +1,17 @@
 import socket
 
 from insanic.monitor import MONITOR_ENDPOINTS
-from insanic.services import Service
 
 from incendiary.loggers import logger, error_logger
 from incendiary.xray import config
-from incendiary.xray.clients import aws_xray_trace_config
 from incendiary.xray.contexts import IncendiaryAsyncContext
 from incendiary.xray.middlewares import before_request, after_request
 from incendiary.xray.mixins import CaptureMixin
 from incendiary.xray.sampling import IncendiaryDefaultSampler
+from incendiary.xray.services import IncendiaryService
 from incendiary.xray.utils import tracing_name
 
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch, AsyncAWSXRayRecorder
 from aws_xray_sdk import global_sdk_config
 
 
@@ -80,7 +79,7 @@ class Incendiary(CaptureMixin):
         if len(messages) == 0:
             global_sdk_config.set_sdk_enabled(True)
             # app.xray_recorder = AsyncAWSXRayRecorder()
-            app.xray_recorder = xray_recorder
+            app.xray_recorder = AsyncAWSXRayRecorder()
             # app.xray_recorder.configure(**cls.xray_config(app))
 
             cls.setup_middlewares(app)
@@ -119,11 +118,15 @@ class Incendiary(CaptureMixin):
 
     @classmethod
     def setup_client(cls, app):
-        Service.extra_session_configs = {
-            "trace_configs": [
-                aws_xray_trace_config(xray_recorder=app.xray_recorder)
-            ]
-        }
+        from insanic.services.registry import LazyServiceRegistry
+
+        LazyServiceRegistry.service_class = IncendiaryService
+        LazyServiceRegistry.service_class.xray_recorder = app.xray_recorder
+        # Service.extra_session_configs = {
+        #     "trace_configs": [
+        #         aws_xray_trace_config(xray_recorder=app.xray_recorder)
+        #     ]
+        # }
 
     @classmethod
     def setup_middlewares(cls, app):

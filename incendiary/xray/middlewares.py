@@ -39,7 +39,7 @@ async def before_request(request):
         segment.save_origin_trace_header(xray_header)
         segment.put_annotation("insanic_version", __version__)
         segment.put_annotation(
-            "service_version", settings.get("SERVICE_VERSION")
+            "service_version", settings.get("APPLICATION_VERSION", "?")
         )
         segment.put_http_meta(http.URL, request.url)
         segment.put_http_meta(http.METHOD, request.method)
