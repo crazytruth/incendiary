@@ -72,7 +72,7 @@ Prerequisites for using:
 -   python >= 3.6
 -   Local running instance of AWS X-Ray Daemon. (Running
     instructions can be found `here <https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-local.html>`_)
-- AWS Credentials (if you want to actually send data to AWS-Ray)
+-   AWS Credentials (if you want to actually send data to AWS-Ray)
 
 
 
@@ -91,7 +91,7 @@ running without any extra configurations.
 To Initialize
 -------------
 
-.. code-block:: py
+.. code-block:: python
 
     # app.py
 
@@ -109,7 +109,7 @@ Now if you run, you should be able to start tracing.
 To Capture
 ----------
 
-.. code-block:: py
+.. code-block:: python
 
     # in_some_module_you_want_to_capture.py
 
@@ -166,6 +166,10 @@ Links
 - Issue Tracker: https://www.github.com/crazytruth/incendiary/issues
 - Insanic Documentation: http://insanic.readthedocs.io/
 - Insanic Repository: https://www.github.com/crazytruth/insanic/
+- AWS X-Ray: https://docs.aws.amazon.com/xray/index.html
+- aws-xray-sdk: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html
+
+
 
 .. _Insanic: https://github.com/crazytruth/insanic
 .. _Documentation: https://incendiary.readthedocs.io/en/latest/
