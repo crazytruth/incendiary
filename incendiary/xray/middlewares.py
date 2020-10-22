@@ -1,6 +1,5 @@
 import traceback
 import ujson as json
-from inspect import isawaitable
 
 from insanic import __version__
 from insanic.conf import settings
@@ -88,9 +87,6 @@ async def after_request(request, response):
         # able to authenticate correctly
 
         user = request.user
-
-        if isawaitable(user):
-            user = await user
 
         if user.id:
             segment.set_user(user.id)
