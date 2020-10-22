@@ -32,7 +32,7 @@ Incendiary
 .. end-badges
 
 
-A Tracing extension for `Insanic`_ that integrate AWS X-Ray.
+A Tracing extension for `Insanic`_ that integrates AWS X-Ray.
 
 
 Why?
