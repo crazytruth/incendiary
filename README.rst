@@ -163,7 +163,7 @@ Links
 - Documentation: https://incendiary.readthedocs.io/en/latest/
 - Releases: https://pypi.org/project/insanic-incendiary/
 - Code: https://www.github.com/crazytruth/incendiary/
-- Issue Tracker: https://www.github.com/crazytruth/iniesta/issues
+- Issue Tracker: https://www.github.com/crazytruth/incendiary/issues
 - Insanic Documentation: http://insanic.readthedocs.io/
 - Insanic Repository: https://www.github.com/crazytruth/insanic/
 
