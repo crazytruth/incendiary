@@ -1,4 +1,6 @@
 import asyncio
+import sys
+
 import pytest
 
 from incendiary.xray.factories import (
@@ -12,7 +14,10 @@ import aiotask_context
 async def run1():
     loop = asyncio.get_event_loop()
 
-    ct = asyncio.Task.current_task(loop)
+    if sys.hexversion >= 0x03070000:
+        ct = asyncio.current_task(loop)
+    else:
+        ct = asyncio.Task.current_task(loop)
     assert hasattr(ct, "context")
     ct.context["entities"] = ["a"]
 
