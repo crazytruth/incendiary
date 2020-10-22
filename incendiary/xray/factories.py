@@ -27,7 +27,7 @@ def tracing_task_factory(loop, coro):
     """
     Task factory function
 
-    Fuction closely mirrors the logic inside of
+    Function closely mirrors the logic inside of
     asyncio.BaseEventLoop.create_task. Then if there is a current
     task and the current task has a context then share that context
     with the new task

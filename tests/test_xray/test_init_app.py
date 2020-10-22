@@ -52,13 +52,6 @@ class TestIncendiaryXRayInitialize:
             "[XRAY] Tracing was not initialized because: Hello"
         )
 
-        monkeypatch.setattr(
-            insanic_application.config, "TRACING_SOFT_FAIL", soft_fail
-        )
-        monkeypatch.setattr(
-            insanic_application.config, "TRACING_REQUIRED", required
-        )
-
         if expected == "LOG":
             Incendiary._handle_error(insanic_application, ["Hello"])
             assert len(caplog.records) != 0

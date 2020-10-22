@@ -1,21 +1,25 @@
+from typing import Tuple
+
 TRACING_HOST = "xray"
 TRACING_PORT = 2000
 
-# if true then tracing is enabled with this aplication
-TRACING_ENABLED = True
-TRACING_REQUIRED = True
+#: Determines if tracing should be enabled for this application.
+TRACING_ENABLED: bool = True
 
-# if true, even if xray is unable to be configured properly, application still runs
-TRACING_SOFT_FAIL = True
+#: Behavior when context is missing in X-Ray. Values can be :code:`LOG_ERROR` or :code:`RUNTIME_ERROR`.
+TRACING_CONTEXT_MISSING_STRATEGY: str = "LOG_ERROR"  # or "RUNTIME_ERROR"
 
-TRACING_CONTEXT_MISSING_STRATEGY = "LOG_ERROR"  # or "RUNTIME_ERROR"
+#: Modules to auto patch on initialization.
+TRACING_PATCH_MODULES: Tuple[str] = ("aiobotocore",)
 
-TRACING_PATCH_MODULES = ("aiobotocore",)
+#: The default sampling value for fixed target.
+DEFAULT_SAMPLING_FIXED_TARGET: int = 60 * 10
 
-DEFAULT_SAMPLING_FIXED_TARGET = 60 * 10
-DEFAULT_SAMPLING_RATE = 0.01
+#: The default sampling rate.
+DEFAULT_SAMPLING_RATE: float = 0.01
 
-SAMPLING_RULES = {
+#: The local sampling rules for the recorder.
+SAMPLING_RULES: dict = {
     "version": 1,
     "rules": [
         # {

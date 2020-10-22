@@ -3,6 +3,8 @@ import ujson as json
 
 from insanic import __version__
 from insanic.conf import settings
+from insanic.request import Request
+from sanic.response import BaseHTTPResponse
 
 from incendiary.xray.utils import abbreviate_for_xray, get_safe_dict
 
@@ -10,7 +12,12 @@ from aws_xray_sdk.core.models import http
 from aws_xray_sdk.ext.util import calculate_segment_name, construct_xray_header
 
 
-async def before_request(request):
+async def before_request(request: Request) -> None:
+    """
+    The request middleware that runs when Sanic receives a
+    request. Starts a segment if sampling determines if
+    it should be traced.
+    """
     xray_recorder = request.app.xray_recorder
 
     headers = request.headers
@@ -76,7 +83,10 @@ async def before_request(request):
                 segment.put_metadata(f"{attr}", payload, "request")
 
 
-async def after_request(request, response):
+async def after_request(request: Request, response: BaseHTTPResponse) -> None:
+    """
+    Ends the segment before response is returned.
+    """
     xray_recorder = request.app.xray_recorder
     segment = xray_recorder.current_segment()
 

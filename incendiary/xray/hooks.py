@@ -30,6 +30,14 @@ LOCAL_EXCEPTIONS = (
 def begin_subsegment(
     request: Request, recorder: AsyncAWSXRayRecorder, name: str = None
 ) -> Optional[Subsegment]:
+    """
+    Begins a subsegment before sending an interservice
+    request.
+
+    :param request: The httpx request object for interservice communications.
+    :param recorder: The AWS X-Ray recorder for this application.
+    :return: The started subsegment.
+    """
     name = name or strip_url(str(request.url))
 
     try:
@@ -56,7 +64,8 @@ def end_subsegment(
     *, request, response, recorder, subsegment: Optional[Subsegment] = None
 ) -> None:
     """
-    As long as the request returns a response, this gets run
+    The function that ends the subsegment after a response gets
+    received.
 
     :param request: The request object for interservice communications.
     :param response: Response object of the request.
@@ -91,13 +100,9 @@ def end_subsegment_with_exception(
     recorder: AsyncAWSXRayRecorder,
 ) -> None:
     """
-    exception when establishing connection
-
-    :param request:
-    :param exception:
-    :param subsegment:
-    :param recorder:
-    :return:
+    The function that ends the subsegment when an
+    exception is raised while attempting to send an
+    interservice request.
     """
 
     if getattr(request, "give_up", None):

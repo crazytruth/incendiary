@@ -2,6 +2,7 @@ import copy
 
 from aws_xray_sdk.core.sampling.sampler import DefaultSampler
 from aws_xray_sdk.core.sampling.local.sampler import LocalSampler
+from insanic import Insanic
 
 from incendiary.loggers import logger
 
@@ -16,7 +17,11 @@ class IncendiaryDefaultSampler(DefaultSampler):
         "rate": float,
     }
 
-    def __init__(self, app):
+    def __init__(self, app: Insanic) -> None:
+        """
+        An Incendiary Sampler that determines if a request
+        should be sampled or not.
+        """
         self.app = app
         super().__init__()
         self._local_sampler = LocalSampler(self.local_rules)
