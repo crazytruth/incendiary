@@ -17,6 +17,9 @@ import datetime
 sys.path.insert(0, os.path.abspath("."))
 
 import incendiary  # noqa: ignore=E402
+from insanic.conf import settings  # noqa: ignore=E402
+
+settings.configure()
 
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
 
