@@ -28,8 +28,8 @@ class IncendiaryDefaultSampler(DefaultSampler):
 
     @property
     def local_rules(self) -> dict:
-        rules = copy.deepcopy(self.app.config.SAMPLING_RULES)
-        if not self.app.config.TRACING_ENABLED:
+        rules = copy.deepcopy(self.app.config.INCENDIARY_XRAY_SAMPLING_RULES)
+        if not self.app.config.INCENDIARY_XRAY_ENABLED:
             rules.update({"rules": []})
             rules.update({"default": {"fixed_target": 0, "rate": 0}})
         return rules
@@ -48,7 +48,7 @@ class IncendiaryDefaultSampler(DefaultSampler):
         if trace_header.sampled is not None and trace_header.sampled != "?":
             logger.debug("Sample decision: from trace headers.")
             return trace_header.sampled
-        elif not self.app.config.TRACING_ENABLED:
+        elif not self.app.config.INCENDIARY_XRAY_ENABLED:
             logger.debug("Sample decision: from insanic configs")
             return 0
         elif not recorder.sampling:

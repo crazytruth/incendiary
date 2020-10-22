@@ -25,7 +25,7 @@ async def before_request(request: Request) -> None:
 
     name = calculate_segment_name(request.host, xray_recorder)
 
-    # custom decision to skip if TRACING_ENABLED is false
+    # custom decision to skip if INCENDIARY_XRAY_ENABLED is false
     sampling_decision = xray_recorder.sampler.calculate_sampling_decision(
         trace_header=xray_header,
         recorder=xray_recorder,

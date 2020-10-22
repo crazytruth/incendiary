@@ -22,7 +22,7 @@ class TestIncendiaryXRayInitialize:
 
         Incendiary.init_app(insanic_application)
 
-        assert insanic_application.config.TRACING_ENABLED is False
+        assert insanic_application.config.INCENDIARY_XRAY_ENABLED is False
 
     def test_prerequisites_host_error(self, insanic_application):
         errors = Incendiary._check_prerequisites(insanic_application)

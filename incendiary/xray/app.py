@@ -44,13 +44,13 @@ class Incendiary(CaptureMixin):
     def _check_prerequisites(cls, app: Insanic) -> List[str]:
         """
         Checks to see if xray daemon is accessible
-        with :code:`TRACING_HOST` and :code:`TRACING_PORT`.
+        with :code:`INCENDIARY_XRAY_DAEMON_HOST` and :code:`INCENDIARY_XRAY_DAEMON_PORT`.
 
         :return: List of error messages while validating xray prerequisites.
         """
         messages = []
-        tracing_host = app.config.TRACING_HOST
-        tracing_port = app.config.TRACING_PORT
+        tracing_host = app.config.INCENDIARY_XRAY_DAEMON_HOST
+        tracing_port = app.config.INCENDIARY_XRAY_DAEMON_PORT
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:  # pragma: no cover
@@ -99,11 +99,11 @@ class Incendiary(CaptureMixin):
             cls.setup_client(app)
             cls.setup_listeners(app)
 
-            patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
+            patch(app.config.INCENDIARY_XRAY_PATCH_MODULES, raise_errors=False)
             app.plugin_initialized("incendiary", cls)
         else:
             cls._handle_error(app, messages)
-            app.config.TRACING_ENABLED = False
+            app.config.INCENDIARY_XRAY_ENABLED = False
             global_sdk_config.set_sdk_enabled(False)
 
     @classmethod
@@ -187,8 +187,8 @@ class Incendiary(CaptureMixin):
             sampling=True,
             sampler=IncendiaryDefaultSampler(app),
             # sampling_rules=app.sampler.sampling_rules,
-            daemon_address=f"{app.config.TRACING_HOST}:{app.config.TRACING_PORT}",
-            context_missing=app.config.TRACING_CONTEXT_MISSING_STRATEGY,
+            daemon_address=f"{app.config.INCENDIARY_XRAY_DAEMON_HOST}:{app.config.INCENDIARY_XRAY_DAEMON_PORT}",
+            context_missing=app.config.INCENDIARY_XRAY_CONTEXT_MISSING_STRATEGY,
             streaming_threshold=10,
             plugins=("ECSPlugin",),
         )

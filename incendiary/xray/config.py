@@ -1,25 +1,28 @@
 from typing import Tuple
 
-TRACING_HOST = "xray"
-TRACING_PORT = 2000
-
 #: Determines if tracing should be enabled for this application.
-TRACING_ENABLED: bool = True
+INCENDIARY_XRAY_ENABLED: bool = True
+
+#: The host of the running X-Ray Daemon
+INCENDIARY_XRAY_DAEMON_HOST: str = "xray"
+
+#: The port of the running X-Ray Daemon
+INCENDIARY_XRAY_DAEMON_PORT: int = 2000
 
 #: Behavior when context is missing in X-Ray. Values can be :code:`LOG_ERROR` or :code:`RUNTIME_ERROR`.
-TRACING_CONTEXT_MISSING_STRATEGY: str = "LOG_ERROR"  # or "RUNTIME_ERROR"
+INCENDIARY_XRAY_CONTEXT_MISSING_STRATEGY: str = "LOG_ERROR"  # or "RUNTIME_ERROR"
 
 #: Modules to auto patch on initialization.
-TRACING_PATCH_MODULES: Tuple[str] = ("aiobotocore",)
+INCENDIARY_XRAY_PATCH_MODULES: Tuple[str] = ("aiobotocore",)
 
 #: The default sampling value for fixed target.
-DEFAULT_SAMPLING_FIXED_TARGET: int = 60 * 10
+INCENDIARY_XRAY_DEFAULT_SAMPLING_FIXED_TARGET: int = 60 * 10
 
 #: The default sampling rate.
-DEFAULT_SAMPLING_RATE: float = 0.01
+INCENDIARY_XRAY_DEFAULT_SAMPLING_RATE: float = 0.01
 
 #: The local sampling rules for the recorder.
-SAMPLING_RULES: dict = {
+INCENDIARY_XRAY_SAMPLING_RULES: dict = {
     "version": 1,
     "rules": [
         # {
@@ -32,7 +35,7 @@ SAMPLING_RULES: dict = {
         # }
     ],
     "default": {
-        "fixed_target": DEFAULT_SAMPLING_FIXED_TARGET,
-        "rate": DEFAULT_SAMPLING_RATE,
+        "fixed_target": INCENDIARY_XRAY_DEFAULT_SAMPLING_FIXED_TARGET,
+        "rate": INCENDIARY_XRAY_DEFAULT_SAMPLING_RATE,
     },
 }

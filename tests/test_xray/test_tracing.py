@@ -35,8 +35,12 @@ class TestTracing:
             "rules": [],
             "default": {"fixed_target": 1, "rate": 0},
         }
-        monkeypatch.setattr(settings, "SAMPLING_RULES", sr, raising=False)
-        monkeypatch.setattr(settings, "TRACING_ENABLED", True, raising=False)
+        monkeypatch.setattr(
+            settings, "INCENDIARY_XRAY_SAMPLING_RULES", sr, raising=False
+        )
+        monkeypatch.setattr(
+            settings, "INCENDIARY_XRAY_ENABLED", True, raising=False
+        )
         monkeypatch.setattr(
             settings,
             "SERVICE_CONNECTIONS",
@@ -74,8 +78,12 @@ class TestTracing:
             "rules": [],
             "default": {"fixed_target": 0, "rate": 0},
         }
-        monkeypatch.setattr(settings, "SAMPLING_RULES", sr, raising=False)
-        monkeypatch.setattr(settings, "TRACING_ENABLED", False, raising=False)
+        monkeypatch.setattr(
+            settings, "INCENDIARY_XRAY_SAMPLING_RULES", sr, raising=False
+        )
+        monkeypatch.setattr(
+            settings, "INCENDIARY_XRAY_ENABLED", False, raising=False
+        )
         monkeypatch.setattr(
             Incendiary, "_check_prerequisites", _mock_check_prerequisites
         )
@@ -117,7 +125,9 @@ class TestTracing:
     async def test_tracing_enabled_false(
         self, sanic_test_server, monkeypatch, client_session
     ):
-        monkeypatch.setattr(settings, "TRACING_ENABLED", False, raising=False)
+        monkeypatch.setattr(
+            settings, "INCENDIARY_XRAY_ENABLED", False, raising=False
+        )
 
         flag = 0
         for _ in range(10):
