@@ -46,17 +46,19 @@ class IncendiaryDefaultSampler(DefaultSampler):
         sampling rule to decide.
         """
         if trace_header.sampled is not None and trace_header.sampled != "?":
-            logger.debug("Sample decision: from trace headers.")
+            logger.debug(
+                f"Sample decision: {trace_header.sampled} (from trace headers"
+            )
             return trace_header.sampled
         elif not self.app.config.INCENDIARY_XRAY_ENABLED:
-            logger.debug("Sample decision: from insanic configs")
+            logger.debug("Sample decision: False (from insanic config)")
             return 0
         elif not recorder.sampling:
-            logger.debug("Sample decision: from recorder sampling")
+            logger.debug("Sample decision: True (from recorder sampling)")
             return 1
         elif self.should_trace(sampling_req={"method": method, "path": path}):
-            logger.debug("Sample decision: from sampler rules")
+            logger.debug("Sample decision: True (from sampler rules)")
             return 1
         else:
-            logger.debug("Sample decision: not sampled ")
+            logger.debug("Sample decision: False (not sampled)")
             return 0
