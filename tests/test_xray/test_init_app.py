@@ -2,6 +2,7 @@ import pytest
 import logging
 
 from aws_xray_sdk.core import AsyncAWSXRayRecorder
+from insanic.conf import settings
 
 from insanic.exceptions import ImproperlyConfigured
 
@@ -24,7 +25,9 @@ class TestIncendiaryXRayInitialize:
 
         assert insanic_application.config.INCENDIARY_XRAY_ENABLED is False
 
-    def test_prerequisites_host_error(self, insanic_application):
+    def test_prerequisites_host_error(self, insanic_application, monkeypatch):
+        monkeypatch.setattr(settings, "INCENDIARY_XRAY_DAEMON_HOST", "xray")
+
         errors = Incendiary._check_prerequisites(insanic_application)
 
         assert errors != []
