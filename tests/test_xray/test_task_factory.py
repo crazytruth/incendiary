@@ -4,6 +4,7 @@ import pytest
 from incendiary.xray.factories import (
     tracing_task_factory,
     wrap_tracing_task_factory,
+    current_task_method,
 )
 
 import aiotask_context
@@ -12,7 +13,8 @@ import aiotask_context
 async def run1():
     loop = asyncio.get_event_loop()
 
-    ct = asyncio.Task.current_task(loop)
+    ct = current_task_method(loop)
+
     assert hasattr(ct, "context")
     ct.context["entities"] = ["a"]
 
@@ -20,7 +22,7 @@ async def run1():
     # await loop.create_task(run2())
     await asyncio.gather(run2(), run2())
 
-    ct = asyncio.Task.current_task(loop)
+    ct = current_task_method(loop)
     assert hasattr(ct, "context")
     assert "entities" in ct.context
     assert ct.context["entities"] == ["a"]
@@ -29,7 +31,7 @@ async def run1():
 async def run2():
     loop = asyncio.get_event_loop()
 
-    ct = asyncio.Task.current_task(loop)
+    ct = current_task_method(loop)
     assert hasattr(ct, "context")
     ct.context["entities"].append("b")
 
@@ -54,14 +56,14 @@ class TestTaskFactory:
     async def test_default_task_factory(self, set_default_task_factory):
         loop = asyncio.get_event_loop()
 
-        current_task = asyncio.Task.current_task(loop=loop)
+        current_task = current_task_method(loop=loop)
         current_task.context = {}
 
         await run1()
 
     async def test_wrapped_task_factory(self, wrap_task_factory):
         loop = asyncio.get_event_loop()
-        current_task = asyncio.Task.current_task(loop=loop)
+        current_task = current_task_method(loop=loop)
         current_task.context = {}
 
         await run1()

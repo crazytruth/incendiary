@@ -2,6 +2,7 @@ import copy
 
 from aws_xray_sdk.core.sampling.sampler import DefaultSampler
 from aws_xray_sdk.core.sampling.local.sampler import LocalSampler
+from insanic import Insanic
 
 from incendiary.loggers import logger
 
@@ -16,15 +17,19 @@ class IncendiaryDefaultSampler(DefaultSampler):
         "rate": float,
     }
 
-    def __init__(self, app):
+    def __init__(self, app: Insanic) -> None:
+        """
+        An Incendiary Sampler that determines if a request
+        should be sampled or not.
+        """
         self.app = app
         super().__init__()
         self._local_sampler = LocalSampler(self.local_rules)
 
     @property
     def local_rules(self) -> dict:
-        rules = copy.deepcopy(self.app.config.SAMPLING_RULES)
-        if not self.app.config.TRACING_ENABLED:
+        rules = copy.deepcopy(self.app.config.INCENDIARY_XRAY_SAMPLING_RULES)
+        if not self.app.config.INCENDIARY_XRAY_ENABLED:
             rules.update({"rules": []})
             rules.update({"default": {"fixed_target": 0, "rate": 0}})
         return rules
@@ -41,17 +46,19 @@ class IncendiaryDefaultSampler(DefaultSampler):
         sampling rule to decide.
         """
         if trace_header.sampled is not None and trace_header.sampled != "?":
-            logger.debug("Sample decision: from trace headers.")
+            logger.debug(
+                f"Sample decision: {trace_header.sampled} (from trace headers"
+            )
             return trace_header.sampled
-        elif not self.app.config.TRACING_ENABLED:
-            logger.debug("Sample decision: from insanic configs")
+        elif not self.app.config.INCENDIARY_XRAY_ENABLED:
+            logger.debug("Sample decision: False (from insanic config)")
             return 0
         elif not recorder.sampling:
-            logger.debug("Sample decision: from recorder sampling")
+            logger.debug("Sample decision: True (from recorder sampling)")
             return 1
         elif self.should_trace(sampling_req={"method": method, "path": path}):
-            logger.debug("Sample decision: from sampler rules")
+            logger.debug("Sample decision: True (from sampler rules)")
             return 1
         else:
-            logger.debug("Sample decision: not sampled ")
+            logger.debug("Sample decision: False (not sampled)")
             return 0

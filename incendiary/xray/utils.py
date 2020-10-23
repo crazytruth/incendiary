@@ -1,5 +1,5 @@
 import re
-from typing import Optional
+from typing import Optional, Any
 
 from sanic.request import File
 
@@ -23,14 +23,13 @@ HIDDEN_SETTINGS = re.compile(
     "|".join(HIDDEN_KEY_WORDS + [v.lower() for v in HIDDEN_KEY_WORDS])
 )
 
-CLEANSED_SUBSTITUTE = "*********"
+CLEANSED_SUBSTITUTE: str = "*********"
 
 
 def tracing_name(name: Optional[str] = None) -> str:
     """
-
-    :param name: if name is none assume self
-    :return:
+    Returns that tracing node name. Appends the
+    environment with the application's service name.
     """
     if name is None:
         name = settings.SERVICE_NAME
@@ -38,6 +37,11 @@ def tracing_name(name: Optional[str] = None) -> str:
 
 
 def abbreviate_for_xray(payload: dict) -> dict:
+    """
+    If the payload includes a file, the file is translated
+    to just it's name and size instead of including the
+    whole file.
+    """
     for k in payload.keys():
         v = payload.get(k)
         if isinstance(v, File):
@@ -46,8 +50,9 @@ def abbreviate_for_xray(payload: dict) -> dict:
     return payload
 
 
-def cleanse_value(key, value):
-    """Cleanse an individual setting key/value of sensitive content.
+def cleanse_value(key: str, value: Any):
+    """
+    Cleanse an individual setting key/value of sensitive content.
     If the value is a dictionary, recursively cleanse the keys in
     that dictionary.
     """
@@ -68,8 +73,10 @@ def cleanse_value(key, value):
     return cleansed
 
 
-def get_safe_dict(target):
-    "Returns a dictionary with sensitive settings blurred out."
+def get_safe_dict(target: dict) -> dict:
+    """
+    Returns a dictionary with sensitive settings blurred out.
+    """
     return_value = {}
     for k in target:
         return_value[k] = cleanse_value(k, target.get(k))
@@ -77,8 +84,10 @@ def get_safe_dict(target):
 
 
 def get_safe_settings() -> dict:
-    "Returns a dictionary of the settings module, with sensitive settings blurred out."
-
+    """
+    Returns a dictionary of the settings module,
+    with sensitive settings blurred out.
+    """
     return get_safe_dict(
         {k: getattr(settings, k) for k in dir(settings) if k.isupper()}
     )

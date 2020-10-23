@@ -3,6 +3,7 @@ from aws_xray_sdk.core import xray_recorder
 from aws_xray_sdk.core.sampling.sampler import DefaultSampler
 from insanic import Insanic
 
+
 from incendiary.xray.app import Incendiary
 
 from .utils import StubbedEmitter
@@ -28,6 +29,15 @@ def reset_recorder(insanic_application):
     insanic_application.sampler = IncendiaryDefaultSampler(insanic_application)
     xray_recorder.configure(**Incendiary.xray_config(insanic_application))
     xray_recorder.sampler = DefaultSampler()
+
+
+@pytest.fixture(autouse=True)
+def reset_registry():
+
+    yield
+    from insanic.services.registry import registry
+
+    registry.reset()
 
 
 @pytest.fixture()

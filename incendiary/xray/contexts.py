@@ -8,6 +8,7 @@ from incendiary.xray.factories import (
 
 class IncendiaryAsyncContext(_AsyncContext):
     def __init__(self, *args, loop=None, use_task_factory=True, **kwargs):
+
         super().__init__(*args, loop=loop, use_task_factory=False, **kwargs)
 
         if use_task_factory:

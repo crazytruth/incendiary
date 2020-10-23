@@ -1,109 +1,171 @@
-============
-Contributing
-============
+..
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+Contributing to Incendiary
+===========================
 
-You can contribute in many ways:
+Thank you for considering to contribute to Incendiary.
 
-Types of Contributions
-----------------------
 
-Report Bugs
-~~~~~~~~~~~
+Setup for development
+-----------------------
 
-Report bugs at https://github.com/MyMusicTaste/incendiary/issues.
+-   Fork Incendiary to your GitHub account.
+-   `Clone`_ the Incendiary repository locally.
 
-If you are reporting a bug, please include:
+    .. code-block:: text
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
+        $ git clone https://github.com/crazytruth/incendiary
+        $ cd incendiary
 
-Fix Bugs
-~~~~~~~~
+-   Add your fork as a remote to push your work to. Replace
+    ``{username}`` with your username. This names the remote "fork", the
+    default crazytruth remote is "origin".
 
-Look through the GitHub issues for bugs. Anything tagged with "bug"
-is open to whoever wants to implement it.
+    .. code-block:: text
 
-Implement Features
-~~~~~~~~~~~~~~~~~~
+        git remote add fork https://github.com/{username}/incendiary
 
-Look through the GitHub issues for features. Anything tagged with "feature"
-is open to whoever wants to implement it.
+-   Create a virtualenv with `pyenv`_ and `pyenv-virtualenv`_.
 
-Write Documentation
-~~~~~~~~~~~~~~~~~~~
+    -   Prerequisites for creating a virtualenv
 
-incendiary could always use more documentation, whether as part of the
-official incendiary docs, in docstrings, or even on the web in blog posts,
-articles, and such.
+        Please install `pyenv`_ and `pyenv-virtualenv`_ if you dont have them
+        installed.
 
-Submit Feedback
-~~~~~~~~~~~~~~~
+        You must also install the Python versions with :code:`pyenv`.
 
-The best way to send feedback is to file an issue at https://github.com/MyMusicTaste/incendiary/issues.
+        .. code-block:: bash
 
-If you are proposing a feature:
+            # to view available python versions
+            $ pyenv install --list
 
-* Explain in detail how it would work.
-* Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that contributions
-  are welcome :)
+            # to install python 3.6.12
+            $ pyenv install 3.6.12
 
-Get Started!
-------------
+    Now to settings the virtual environment.
 
-Ready to contribute? Here's how to set up `incendiary` for
-local development.
+    Replace ``{pythonversion}`` with the python version to
+    create the virtual environment in.
 
-1. Fork_ the `incendiary` repo on GitHub.
-2. Clone your fork locally::
+    .. code-block:: bash
 
-    $ git clone git@github.com:your_name_here/incendiary.git
+        $ pyenv virtualenv {pythonversion} incendiary
+        $ pyenv local incendiary
 
-3. Create a branch for local development::
+-   Install Incendiary in editable mode with development dependencies.
 
-    $ git checkout -b name-of-your-bugfix-or-feature
+    .. code-block:: text
 
-Now you can make your changes locally.
+        $ pip install -e . -r requirements/dev.txt
 
-4. When you're done making changes, check that your changes pass style and unit
-   tests, including testing other Python versions with tox::
+-   Install the pre-commit hooks.
+
+    .. code-block:: text
+
+        $ pre-commit install
+
+.. _pyenv: https://github.com/pyenv/pyenv
+.. _pyenv-virtualenv: https://github.com/pyenv/pyenv-virtualenv
+.. _Fork: https://github.com/crazytruth/incendiary/fork
+.. _Clone: https://help.github.com/en/articles/fork-a-repo#step-2-create-a-local-clone-of-your-fork
+
+
+Start coding
+--------------
+
+-   Create a branch to identify the issue you would like to work on. If
+    you're submitting a bug or documentation fix, branch off of the
+    latest ".x" branch.
+
+    .. code-block:: text
+
+        $ git fetch origin
+        $ git checkout -b your-branch-name origin/1.1.x
+
+    If you're submitting a feature addition or change, branch off of the
+    "master" branch.
+
+    .. code-block:: text
+
+        $ git fetch origin
+        $ git checkout -b your-branch-name origin/master
+
+-   Using your favorite editor, make your changes,
+    `committing as you go`_.
+-   Include tests that cover any code changes you make. Make sure the
+    test fails without your patch. Run the tests as described below.
+-   Push your commits to your fork on GitHub and
+    `create a pull request`_. Link to the issue being addressed with
+    ``fixes #123`` in the pull request.
+
+    .. code-block:: text
+
+        $ git push --set-upstream fork your-branch-name
+
+.. _committing as you go: https://dont-be-afraid-to-commit.readthedocs.io/en/latest/git/commandlinegit.html#commit-your-changes
+.. _create a pull request: https://help.github.com/en/articles/creating-a-pull-request
+
+
+Running the tests
+--------------------
+
+Run the basic test suite with pytest.
+
+.. code-block:: text
+
+    $ pytest
+
+This runs the tests for the current environment, which is usually
+sufficient. CI will run the full suite when you submit your pull
+request. You can run the full test suite with tox if you don't want to
+wait.
+
+.. code-block:: text
 
     $ tox
 
-To get tox, just pip install it.
 
-5. Commit your changes and push your branch to GitHub::
+Running test coverage
+---------------------
 
-    $ git add .
-    $ git commit -m "Your detailed description of your changes."
-    $ git push origin name-of-your-bugfix-or-feature
+Generating a report of lines that do not have test coverage can indicate
+where to start contributing. Run ``pytest`` using ``coverage`` and
+generate a report.
 
-6. Submit a pull request through the GitHub website.
+.. code-block:: text
 
-.. _Fork: https://github.com/crazytruth/incendiary/fork
+    $ pip install coverage
+    $ coverage run -m pytest
+    $ coverage html
 
-Pull Request Guidelines
------------------------
+Open ``htmlcov/index.html`` in your browser to explore the report.
 
-Before you submit a pull request, check that it meets these guidelines:
-
-1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
-3. The pull request should work for Python 2.6, 2.7, and 3.3, and for PyPy.
-   Check https://travis-ci.org/crazytruth/incendiary
-   under pull requests for active pull requests or run the ``tox`` command and
-   make sure that the tests pass for all supported Python versions.
+Read more about `coverage <https://coverage.readthedocs.io>`__.
 
 
-Tips
-----
+Building the docs
+-----------------
 
-To run a subset of tests::
+Build the docs in the ``docs`` directory using Sphinx.
 
-	 $ py.test test/test_incendiary.py
+.. code-block:: text
+
+    $ cd docs
+    $ make html
+
+Open ``build/html/index.html`` in your browser to view the docs.
+
+Read more about `Sphinx <https://www.sphinx-doc.org/en/stable/>`__.
+
+To recompile requirements
+-------------------------
+
+All requirements for development, tests, and documentation are
+in :code:`requirements` directory.
+
+To recompile requirements. Add the requirements to :code:`*.in`
+
+.. code-block::
+
+    $ cd requirements
+    $ pip-compile dev.in

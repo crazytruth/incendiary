@@ -1,5 +1,4 @@
 from insanic import Insanic
-from insanic.conf import settings
 
 from incendiary import Incendiary
 
@@ -11,7 +10,6 @@ from .views import (
     MockInterServiceView,
 )
 
-settings.configure(SERVICE_CONNECTIONS=["incendiary", "incendiary_exception"])
 
 app = Insanic("incendiary1", version="0.1.0")
 Incendiary.init_app(app)

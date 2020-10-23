@@ -21,7 +21,12 @@ CAPTURE_WARNING = (
 
 
 class IncendiaryAsyncSubsegmentContextManager(AsyncSubsegmentContextManager):
+    """
+    A context manager that starts and ends a segment.
+    """
+
     def __init__(self, instance, *args, **kwargs):
+
         self.instance = instance
         super(IncendiaryAsyncSubsegmentContextManager, self).__init__(
             *args, **kwargs
@@ -75,11 +80,10 @@ class CaptureMixin:
         cls, name: Optional[str] = None
     ) -> IncendiaryAsyncSubsegmentContextManager:
         """
-        A decorator that records enclosed function in a subsegment.
-        It only works with asynchronous function
+        A decorator that records enclosed function or method
+        in a subsegment. It only works with asynchronous function
 
-        :param str name: The name of the subsegment. If not specified the function name will be used.
-        :return:
+        :param name: The name of the subsegment. If not specified, the function name will be used.
         """
         return IncendiaryAsyncSubsegmentContextManager(
             cls, xray_recorder, name=name
@@ -88,7 +92,7 @@ class CaptureMixin:
     @classmethod
     def capture(cls, name: Optional[str] = None) -> SubsegmentContextManager:
         """
-        Return a subsegment context manger.
+        A decorator that records decorated callable in a subsegment.
 
         :param name: The name of the subsegment. If not specified the function name will be used.
         """

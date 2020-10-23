@@ -1,9 +1,10 @@
 import traceback
 import ujson as json
-from inspect import isawaitable
 
 from insanic import __version__
 from insanic.conf import settings
+from insanic.request import Request
+from sanic.response import BaseHTTPResponse
 
 from incendiary.xray.utils import abbreviate_for_xray, get_safe_dict
 
@@ -11,7 +12,12 @@ from aws_xray_sdk.core.models import http
 from aws_xray_sdk.ext.util import calculate_segment_name, construct_xray_header
 
 
-async def before_request(request):
+async def before_request(request: Request) -> None:
+    """
+    The request middleware that runs when Sanic receives a
+    request. Starts a segment if sampling determines if
+    it should be traced.
+    """
     xray_recorder = request.app.xray_recorder
 
     headers = request.headers
@@ -19,7 +25,7 @@ async def before_request(request):
 
     name = calculate_segment_name(request.host, xray_recorder)
 
-    # custom decision to skip if TRACING_ENABLED is false
+    # custom decision to skip if INCENDIARY_XRAY_ENABLED is false
     sampling_decision = xray_recorder.sampler.calculate_sampling_decision(
         trace_header=xray_header,
         recorder=xray_recorder,
@@ -39,7 +45,7 @@ async def before_request(request):
         segment.save_origin_trace_header(xray_header)
         segment.put_annotation("insanic_version", __version__)
         segment.put_annotation(
-            "service_version", settings.get("SERVICE_VERSION")
+            "service_version", settings.get("APPLICATION_VERSION", "?")
         )
         segment.put_http_meta(http.URL, request.url)
         segment.put_http_meta(http.METHOD, request.method)
@@ -77,7 +83,10 @@ async def before_request(request):
                 segment.put_metadata(f"{attr}", payload, "request")
 
 
-async def after_request(request, response):
+async def after_request(request: Request, response: BaseHTTPResponse) -> None:
+    """
+    Ends the segment before response is returned.
+    """
     xray_recorder = request.app.xray_recorder
     segment = xray_recorder.current_segment()
 
@@ -88,9 +97,6 @@ async def after_request(request, response):
         # able to authenticate correctly
 
         user = request.user
-
-        if isawaitable(user):
-            user = await user
 
         if user.id:
             segment.set_user(user.id)

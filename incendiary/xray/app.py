@@ -1,18 +1,20 @@
 import socket
+from typing import List
 
+from insanic import Insanic
 from insanic.monitor import MONITOR_ENDPOINTS
-from insanic.services import Service
+from sanic.config import Config
 
 from incendiary.loggers import logger, error_logger
 from incendiary.xray import config
-from incendiary.xray.clients import aws_xray_trace_config
 from incendiary.xray.contexts import IncendiaryAsyncContext
 from incendiary.xray.middlewares import before_request, after_request
 from incendiary.xray.mixins import CaptureMixin
 from incendiary.xray.sampling import IncendiaryDefaultSampler
+from incendiary.xray.services import IncendiaryService
 from incendiary.xray.utils import tracing_name
 
-from aws_xray_sdk.core import patch, xray_recorder
+from aws_xray_sdk.core import patch, AsyncAWSXRayRecorder
 from aws_xray_sdk import global_sdk_config
 
 
@@ -22,7 +24,7 @@ class Incendiary(CaptureMixin):
     app = None
 
     @classmethod
-    def load_config(cls, settings_object):
+    def load_config(cls, settings_object: Config) -> None:
         if not cls.config_imported:
             for c in dir(config):
                 if c.isupper():
@@ -32,25 +34,23 @@ class Incendiary(CaptureMixin):
             cls.config_imported = True
 
     @classmethod
-    def _handle_error(cls, app, messages):
+    def _handle_error(cls, app: Insanic, messages: List[str]) -> None:
         error_message = (
             "[XRAY] Tracing was not initialized because: " + ", ".join(messages)
         )
         error_logger.critical(error_message)
 
     @classmethod
-    def _check_prerequisites(cls, app):
+    def _check_prerequisites(cls, app: Insanic) -> List[str]:
         """
-        checks to see if xray is accessiable
+        Checks to see if xray daemon is accessible
+        with :code:`INCENDIARY_XRAY_DAEMON_HOST` and :code:`INCENDIARY_XRAY_DAEMON_PORT`.
 
-
-        :param app: Insanic application
-        :return: list of error messages while checking
-        :rtype: list
+        :return: List of error messages while validating xray prerequisites.
         """
         messages = []
-        tracing_host = app.config.TRACING_HOST
-        tracing_port = app.config.TRACING_PORT
+        tracing_host = app.config.INCENDIARY_XRAY_DAEMON_HOST
+        tracing_port = app.config.INCENDIARY_XRAY_DAEMON_PORT
 
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:  # pragma: no cover
@@ -71,7 +71,19 @@ class Incendiary(CaptureMixin):
         return messages
 
     @classmethod
-    def init_app(cls, app):
+    def init_app(cls, app: Insanic) -> None:
+        """
+        Initializes Insanic to use Incendiary.
+
+        -   This loads all default Incendiary configs.
+        -   Validates connection information to X-Ray Daemon.
+        -   Configures X-Ray SDK Recorder
+        -   Attaches middlewares to start stop segments
+        -   Replaces :code:`Service` object with :code:`IncendiaryService`
+            to trace interservice communications.
+        -   Replaces asyncio task factory.
+        -   Patches configured modules
+        """
         # checks to see if tracing can be enabled
         cls.app = app
         cls.load_config(app.config)
@@ -80,22 +92,30 @@ class Incendiary(CaptureMixin):
         if len(messages) == 0:
             global_sdk_config.set_sdk_enabled(True)
             # app.xray_recorder = AsyncAWSXRayRecorder()
-            app.xray_recorder = xray_recorder
+            app.xray_recorder = AsyncAWSXRayRecorder()
             # app.xray_recorder.configure(**cls.xray_config(app))
 
             cls.setup_middlewares(app)
             cls.setup_client(app)
             cls.setup_listeners(app)
 
-            patch(app.config.TRACING_PATCH_MODULES, raise_errors=False)
+            patch(app.config.INCENDIARY_XRAY_PATCH_MODULES, raise_errors=False)
             app.plugin_initialized("incendiary", cls)
         else:
             cls._handle_error(app, messages)
-            app.config.TRACING_ENABLED = False
+            app.config.INCENDIARY_XRAY_ENABLED = False
             global_sdk_config.set_sdk_enabled(False)
 
     @classmethod
-    def setup_listeners(cls, app):
+    def setup_listeners(cls, app: Insanic) -> None:
+        """
+        -   Attaches before server start listener that configures
+            the X-Ray Recorder.
+        -   Attaches a before server start listener that
+            replaces the default asyncio task factory that can
+            hold context.
+        """
+
         async def before_server_start_start_tracing(app, loop=None, **kwargs):
             app.xray_recorder.configure(**cls.xray_config(app))
 
@@ -118,15 +138,23 @@ class Incendiary(CaptureMixin):
             )
 
     @classmethod
-    def setup_client(cls, app):
-        Service.extra_session_configs = {
-            "trace_configs": [
-                aws_xray_trace_config(xray_recorder=app.xray_recorder)
-            ]
-        }
+    def setup_client(cls, app: Insanic) -> None:
+        """
+        Replaces the :code:`Service` class on the service registry
+        with :code:`IncendiaryService`.
+        """
+        from insanic.services.registry import LazyServiceRegistry
+
+        LazyServiceRegistry.service_class = IncendiaryService
+        LazyServiceRegistry.service_class.xray_recorder = app.xray_recorder
 
     @classmethod
-    def setup_middlewares(cls, app):
+    def setup_middlewares(cls, app: Insanic) -> None:
+        """
+        Sets up request and response middlewares that starts a
+        segment, or creates segment, and ends the segment on
+        response.
+        """
         logger.debug("[XRAY] Initializing xray middleware")
 
         @app.middleware("request")
@@ -148,19 +176,23 @@ class Incendiary(CaptureMixin):
             return response
 
     @classmethod
-    def xray_config(cls, app):
-        config = dict(
+    def xray_config(cls, app: Insanic) -> dict:
+        """
+        Class method that returns all the configurations for
+        the X-Ray SDK Recoder.
+        """
+        xray_config = dict(
             service=tracing_name(app.config.SERVICE_NAME),
             context=IncendiaryAsyncContext(),
             sampling=True,
             sampler=IncendiaryDefaultSampler(app),
             # sampling_rules=app.sampler.sampling_rules,
-            daemon_address=f"{app.config.TRACING_HOST}:{app.config.TRACING_PORT}",
-            context_missing=app.config.TRACING_CONTEXT_MISSING_STRATEGY,
+            daemon_address=f"{app.config.INCENDIARY_XRAY_DAEMON_HOST}:{app.config.INCENDIARY_XRAY_DAEMON_PORT}",
+            context_missing=app.config.INCENDIARY_XRAY_CONTEXT_MISSING_STRATEGY,
             streaming_threshold=10,
             plugins=("ECSPlugin",),
         )
 
-        config.update(cls.extra_recorder_configurations)
+        xray_config.update(cls.extra_recorder_configurations)
 
-        return config
+        return xray_config

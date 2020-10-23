@@ -1,94 +1,115 @@
-=============================
-incendiary
-=============================
+.. image:: https://github.com/crazytruth/incendiary/raw/master/artwork/incendiary.jpg
 
-.. image:: https://badge.fury.io/py/incendiary.png
-    :target: http://badge.fury.io/py/incendiary
+**********
+Incendiary
+**********
 
-.. image:: https://travis-ci.org/crazytruth/incendiary.png?branch=master
-    :target: https://travis-ci.org/crazytruth/incendiary
+|Build Status| |Documentation Status| |Codecov|
 
-Tracing plugin for insanic
+|PyPI pyversions| |PyPI version| |PyPI license| |Black|
 
-.. image:: incendiary.jpg
+.. |Build Status| image:: https://github.com/crazytruth/incendiary/workflows/Python%20Tests/badge.svg
+    :target: https://github.com/crazytruth/incendiary/actions?query=workflow%3A%22Python+Tests%22
+
+.. |Documentation Status| image:: https://readthedocs.org/projects/incendiary/badge/?version=latest
+    :target: http://incendiary.readthedocs.io/?badge=latest
+
+.. |Codecov| image:: https://codecov.io/gh/crazytruth/incendiary/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/crazytruth/incendiary
+
+.. |PyPI version| image:: https://img.shields.io/pypi/v/incendiary-framework
+    :target: https://pypi.org/project/insanic-incendiary/
+
+.. |PyPI pyversions| image:: https://img.shields.io/pypi/pyversions/insanic-framework
+    :target: https://pypi.org/project/insanic-incendiary/
+
+.. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
+.. |PyPI license| image:: https://img.shields.io/github/license/crazytruth/incendiary?style=flat-square
+    :target: https://pypi.org/project/insanic-incendiary/
+
+.. end-badges
+
+
+A Tracing extension for `Insanic`_ that integrates AWS X-Ray.
+
 
 Why?
-----
+=====
 
-Tracing is needed in any micro service architecture, and this plugin aims to
-patch insanic's interservice's object so tracing information can be sent to xray.
+Tracing is needed in any micro service architecture, and this plugin
+traces requests received and traces any requests with `Insanic`_'s
+interservice's communications and sends it's traced information
+to `AWS X-Ray`_.
 
+You might be asking why this package is called incendiary.
+In the military there, rifles and machine guns are usually loaded
+with tracer rounds every 3-4 rounds which help adjust for aim.
+And tracer rounds usually have a mild "incendiary" effect to help
+with *visibility*.
 
-The reason it is called incendiary is because of tracer ammunition.
+Tracing is a distributed system also samples(every X request) to
+help with overall *visibility* of the system.
 
 
 Features
---------
+========
 
-* Tracing with AWS X-ray
-* Tracing with OpenTracing
+- Tracing with AWS X-ray.
+- Creates a segment when Insanic receives a request.
+- End the segment before return the response.
+- Sampling configuration
+- Starts and ends subsegments for interservice requests with Insanic.
+- Capture other parts of your code.
+
 
 Installation
 ============
 
-Prerequisites:
+Prerequisites for using:
 
-* python >= 3.6
+-   python >= 3.6
+-   Local running instance of AWS X-Ray Daemon. (Running
+    instructions can be found `here <https://docs.aws.amazon.com/xray/latest/devguide/xray-daemon-local.html>`_)
+-   AWS Credentials (if you want to actually send data to AWS-Ray)
+
 
 
 To install:
 
 .. code-block::
 
-    pip install incendiary
+    pip install insanic-incendiary
 
-Usage
-=====
+Basic Usage
+===========
 
-For AWS X-Ray usage
--------------------
+Basic usage is actually quite simple. You should be able to get it
+running without any extra configurations.
 
-.. code-block:: bash
+To Initialize
+-------------
 
-    pip install incendiary[xray]
-
-For OpenTracing usage
----------------------
-
-.. code-block:: bash
-
-    pip install incendiary[opentracing]
-
-NOTE: for your requirements.txt must place
-
-.. code-block:: txt
-
-    incendiary[xray] == 0.1.0
-
-    # or
-
-    incendiary[opentracing] == 0.1.0
-
-
-To initialize
-=============
-
-.. code-block:: py
+.. code-block:: python
 
     # app.py
 
     ...
 
+    from insanic import Insanic
     from incendiary import Incendiary
 
-    app = Insanic(__name__)
-
+    app = Insanic("my_app", version="0.1.0")
     Incendiary.init_app(app)
 
-To capture
-==========
+Now if you run, you should be able to start tracing.
 
-.. code-block:: py
+
+To Capture
+----------
+
+.. code-block:: python
 
     # in_some_module_you_want_to_capture.py
 
@@ -106,49 +127,50 @@ To capture
     def i_want_to_capture():
         pass
 
+These functions will be its own subsegments in X-Ray.
 
-- `name` can be `None`. If `None` will default to function name.
+.. warning::
+
+    You should try and avoid capturing in a production environment,
+    because capturing has quite a performance impact.
 
 
-Commands
-========
-
-Development
-===========
-
-.. code-block:: bash
-
-    pip install .[development]
-    # or
-    pip install incendiary[development]
-
-Testing
-=======
-
-.. code-block:: bash
-
-    $ pip install .[development]
-    $ pytest
-    # with coverage
-    $ pytest --cov=incendiary --cov-report term-missing:skip-covered
-
-To view documentation
-=====================
-
-.. code-block:: bash
-
-    $ git clone https://github.com/MyMusicTaste/incendiary.git
-    $ cd incendiary
-    $ pip install .[development]
-    $ cd docs
-    $ make html
-    # files will be in /path/to/incendiary/docs/_build
-
+For more information please refer to Incendiary's `Documentation`_.
 
 Release History
 ===============
 
-View release history `here <HISTORY.rst>`_
+View release history `here <CHANGELOG.rst>`_
 
-TODO
-----
+
+Contributing
+=============
+
+For guidance on setting up a development environment and how to make a contribution to Incendiary,
+see the `CONTRIBUTING.rst <CONTRIBUTING.rst>`_ guidelines.
+
+
+Meta
+====
+
+Distributed under the MIT license. See `LICENSE <LICENSE>`_ for more information.
+
+Thanks to all the people at my prior company that worked with me to make this possible.
+
+Links
+=====
+
+- Documentation: https://incendiary.readthedocs.io/en/latest/
+- Releases: https://pypi.org/project/insanic-incendiary/
+- Code: https://www.github.com/crazytruth/incendiary/
+- Issue Tracker: https://www.github.com/crazytruth/incendiary/issues
+- Insanic Documentation: http://insanic.readthedocs.io/
+- Insanic Repository: https://www.github.com/crazytruth/insanic/
+- AWS X-Ray: https://docs.aws.amazon.com/xray/index.html
+- aws-xray-sdk: https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html
+
+
+
+.. _Insanic: https://github.com/crazytruth/insanic
+.. _Documentation: https://incendiary.readthedocs.io/en/latest/
+.. _AWS X-Ray: https://docs.aws.amazon.com/xray/index.html

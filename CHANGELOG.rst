@@ -6,7 +6,8 @@ History
 0.1.6 (unreleased)
 ++++++++++++++++++
 
-- Nothing changed yet.
+- BREAKING: remove opentracing integration for maybe future release
+- UPDATE: change License to MIT
 
 
 0.1.5 (2020-03-02)
