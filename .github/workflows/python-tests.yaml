@@ -54,10 +54,13 @@ jobs:
         pip install tox-gh-actions
     - name: Test with tox
       run: |
-        tox
+        tox -epy
     - name: Check lint
       run: |
         tox -estyle
+    - name: Make Docs
+      run: |
+        tox -edocs
     - name: Upload coverage report
       uses: codecov/codecov-action@v1
       with:
