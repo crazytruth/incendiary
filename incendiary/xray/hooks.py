@@ -10,7 +10,7 @@ from aws_xray_sdk.core.exceptions import exceptions
 from aws_xray_sdk.core.models import http
 from aws_xray_sdk.core.models.subsegment import Subsegment
 from aws_xray_sdk.ext.util import inject_trace_header, strip_url
-from httpx import Request
+from httpx import Request, TransportError
 
 from insanic import status
 
@@ -24,6 +24,7 @@ LOCAL_NAMESPACE = "local"
 LOCAL_EXCEPTIONS = (
     # DNS issues
     OSError,
+    TransportError,
 )
 
 
@@ -62,7 +63,7 @@ def begin_subsegment(
 
 def end_subsegment(
     *, request, response, recorder, subsegment: Optional[Subsegment] = None
-) -> None:
+) -> Optional[Subsegment]:
     """
     The function that ends the subsegment after a response gets
     received.
@@ -85,20 +86,23 @@ def end_subsegment(
                 resp = response.json()
             except JSONDecodeError:
                 resp = response.text
-            resp = get_safe_dict(resp)
-            subsegment.put_annotation("response", json.dumps(resp))
+            else:
+                resp = get_safe_dict(resp)
+                resp = json.dumps(resp)
+            subsegment.put_annotation("response", resp)
 
     # recorder.end_subsegment()
     subsegment.close()
+    return subsegment
 
 
 def end_subsegment_with_exception(
     *,
     request: Request,
     exception: Exception,
-    subsegment: Optional[Subsegment],
+    subsegment: Optional[Subsegment] = None,
     recorder: AsyncAWSXRayRecorder,
-) -> None:
+) -> Optional[Subsegment]:
     """
     The function that ends the subsegment when an
     exception is raised while attempting to send an
@@ -119,3 +123,4 @@ def end_subsegment_with_exception(
             subsegment.namespace = LOCAL_NAMESPACE
 
     subsegment.close()
+    return subsegment
