@@ -1,14 +1,20 @@
 import asyncio
 import copy
+import sys
 
 XRAY_CONTEXT_STORAGE = "entities"
+
+if sys.hexversion >= 0x03070000:
+    current_task_method = asyncio.current_task
+else:
+    current_task_method = asyncio.Task.current_task
 
 
 def wrap_tracing_task_factory(task_factory):
     # @wraps(task_factory)
     def wrapped(loop, coro):
         task = task_factory(loop, coro)
-        current_task = asyncio.Task.current_task(loop=loop)
+        current_task = current_task_method(loop=loop)
 
         if current_task is not None and hasattr(current_task, "context"):
             context = copy.copy(current_task.context)
