@@ -10,6 +10,7 @@ Important Configs
 :code:`INCENDIARY_XRAY_ENABLED`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+
 To turn tracing on or off.  Note however, that even if this
 is :code:`False`, but receives a request with tracing
 sampled headers, the request is still sampled.
