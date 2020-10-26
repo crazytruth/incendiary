@@ -139,7 +139,7 @@ For more information please refer to Incendiary's `Documentation`_.
 Release History
 ===============
 
-View release history `here <CHANGELOG.rst>`_
+View release `history <CHANGELOG.rst>`_
 
 
 Contributing
