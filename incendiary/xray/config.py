@@ -4,7 +4,7 @@ from typing import Tuple
 INCENDIARY_XRAY_ENABLED: bool = True
 
 #: The host of the running X-Ray Daemon
-INCENDIARY_XRAY_DAEMON_HOST: str = "localhost"
+INCENDIARY_XRAY_DAEMON_HOST: str = "127.0.0.1"
 
 #: The port of the running X-Ray Daemon
 INCENDIARY_XRAY_DAEMON_PORT: int = 2000

@@ -1,5 +1,5 @@
 import pytest
-from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import xray_recorder, AsyncAWSXRayRecorder
 from aws_xray_sdk.core.sampling.sampler import DefaultSampler
 from insanic import Insanic
 
@@ -43,6 +43,6 @@ def reset_registry():
 @pytest.fixture()
 def incendiary_application():
     app = Insanic("tracer")
-    Incendiary.init_app(app)
+    Incendiary.init_app(app, AsyncAWSXRayRecorder())
 
     return app

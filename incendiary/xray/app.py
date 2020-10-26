@@ -14,7 +14,7 @@ from incendiary.xray.sampling import IncendiaryDefaultSampler
 from incendiary.xray.services import IncendiaryService
 from incendiary.xray.utils import tracing_name
 
-from aws_xray_sdk.core import patch, AsyncAWSXRayRecorder
+from aws_xray_sdk.core import patch, AsyncAWSXRayRecorder, xray_recorder
 from aws_xray_sdk import global_sdk_config
 
 
@@ -71,7 +71,9 @@ class Incendiary(CaptureMixin):
         return messages
 
     @classmethod
-    def init_app(cls, app: Insanic) -> None:
+    def init_app(
+        cls, app: Insanic, recorder: AsyncAWSXRayRecorder = None
+    ) -> None:
         """
         Initializes Insanic to use Incendiary.
 
@@ -82,7 +84,10 @@ class Incendiary(CaptureMixin):
         -   Replaces :code:`Service` object with :code:`IncendiaryService`
             to trace interservice communications.
         -   Replaces asyncio task factory.
-        -   Patches configured modules
+        -   Patches configured modules.
+
+        :param app: Your Insanic application/
+        :param recorder: If you want to use your own recorder.
         """
         # checks to see if tracing can be enabled
         cls.app = app
@@ -91,9 +96,7 @@ class Incendiary(CaptureMixin):
 
         if len(messages) == 0:
             global_sdk_config.set_sdk_enabled(True)
-            # app.xray_recorder = AsyncAWSXRayRecorder()
-            app.xray_recorder = AsyncAWSXRayRecorder()
-            # app.xray_recorder.configure(**cls.xray_config(app))
+            app.xray_recorder = recorder or xray_recorder
 
             cls.setup_middlewares(app)
             cls.setup_client(app)
