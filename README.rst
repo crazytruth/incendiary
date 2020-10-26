@@ -132,8 +132,7 @@ These functions will be its own subsegments in X-Ray.
 .. warning::
 
     You should try and avoid capturing in a production environment,
-    because capturing has quite a performance impact.
-
+    because capturing has a performance impact.
 
 For more information please refer to Incendiary's `Documentation`_.
 
