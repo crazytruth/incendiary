@@ -3,7 +3,7 @@
 Change Log
 ==========
 
-0.1.6 (unreleased)
+0.2.0 (2020-10-26)
 ------------------
 
 - BREAKING: remove opentracing integration for maybe future release
