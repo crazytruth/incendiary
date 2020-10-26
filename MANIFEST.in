@@ -1,15 +1,19 @@
 recursive-include incendiary *.py
-recursive-include incendiary *.thrift
 global-exclude *.py[co]
 global-exclude __pycache__
-include AUTHORS.rst
-include CONTRIBUTING.rst
-include HISTORY.rst
-include LICENSE
 include README.rst
-exclude tox.ini
-exclude *.png
-exclude *.jpg
-exclude docs
+include CONTRIBUTING.rst
+include CHANGELOG.rst
+include LICENSE
+include requirements/*.txt
+include tox.ini
+exclude *.yaml
+exclude *.toml
+recursive-exclude requirements *.in
+recursive-exclude tests *.py
 exclude .python-version
+graft artwork
+graft docs
 graft tests
+graft .github
+prune docs/build

@@ -1,10 +1,10 @@
 .. :changelog:
 
-History
--------
+Change Log
+==========
 
 0.1.6 (unreleased)
-++++++++++++++++++
+------------------
 
 - BREAKING: remove opentracing integration for maybe future release
 - UPDATE: change License to MIT
@@ -15,33 +15,33 @@ History
 
 
 0.1.5 (2020-03-02)
-++++++++++++++++++
+------------------
 
 - FIX: fix change wrong exception name AlreadyEndedSegment -> AlreadyEndedException
 - CHORE: backward compatibility for 0.8.3> because request user and service is no longer awaitable
 
 
 0.1.4 (2019-12-18)
-++++++++++++++++++
+------------------
 
 - FIX: handles AlreadyEndedException problems when execute http_dispatch in ensure_future task
 
 
 0.1.3 (2019-10-04)
-++++++++++++++++++
+------------------
 
 - FIX: fixes dependency issue with insanic where task manager was being overwritten
 
 
 0.1.2 (2019-08-30)
-++++++++++++++++++
+------------------
 
 - UDPATE: error level for initializing increased to critical
 - FIX: incendiary config overriding vault settings
 
 
 0.1.1 (2019-08-27)
-++++++++++++++++++
+------------------
 
 - UPDATE: updates behavior for capture to just log if incendiary is not initialized
 - CHORE: image and documentations updates
@@ -49,7 +49,7 @@ History
 
 
 0.1.0 (2019-08-20)
-++++++++++++++++++
+------------------
 
 - MAJOR: Initial possible working commit of incendiary
 - BREAKING: changed tracing name to be the same as hostname
