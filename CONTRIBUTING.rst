@@ -169,3 +169,14 @@ To recompile requirements. Add the requirements to :code:`*.in`
 
     $ cd requirements
     $ pip-compile dev.in
+
+
+To run aws xray daemon on local for testing
+--------------------------------------------
+
+You should have an aws account with credentials setup on your
+local machine. To run docker:
+
+.. code-block:: text
+
+    $ docker run --attach STDOUT --name xray-daemon -p 2000:2000/udp -v ~/.aws/:/root/.aws/:ro amazon/aws-xray-daemon -o -n us-east-1
