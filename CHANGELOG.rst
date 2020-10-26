@@ -9,6 +9,10 @@ History
 - BREAKING: remove opentracing integration for maybe future release
 - UPDATE: change License to MIT
 
+.. note::
+
+    Up until here, Incendiary has been an internal release only.
+
 
 0.1.5 (2020-03-02)
 ++++++++++++++++++
