@@ -1,4 +1,4 @@
-.. image:: https://github.com/crazytruth/incendiary/raw/master/artwork/incendiary200px.jpg
+.. image:: https://github.com/crazytruth/incendiary/raw/master/artwork/incendiary200px.png
 
 **********
 Incendiary

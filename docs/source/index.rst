@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. image:: https://github.com/crazytruth/incendiary/raw/master/artwork/incendiary200px.png
+
 .. include:: incendiary/foreword.rst
 
 .. toctree::
